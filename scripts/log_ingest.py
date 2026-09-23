@@ -3,7 +3,7 @@ from pathlib import Path
 
 from risk_engine import create_security_event
 from correlation_engine import correlate_events, print_incident
-
+from database import init_database, save_incident
 
 def load_json_events(file_path):
     path = Path(file_path)
@@ -37,6 +37,8 @@ def normalize_events(raw_events):
 def main():
     log_file = "sample-logs/security_events.json"
 
+    init_database()
+
     print("\nHomeSOC Log Ingestion")
     print("-" * 40)
 
@@ -53,6 +55,12 @@ def main():
         print_incident(
             incident,
             incident_number=number
+        )
+
+        incident_id = save_incident(incident)
+
+        print(
+            f"Incident saved to database with ID {incident_id}."
         )
 
 

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HomeSOC Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 42px;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            margin-top: 6px;
+            margin-bottom: 45px;
+            font-size: 18px;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1f2937;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #374151;
+        }
+
+        th {
+            background: #111827;
+            font-size: 16px;
+        }
+
+        tr:hover {
+            background: #273449;
+        }
+
+        .CRITICAL {
+            color: #ff5c5c;
+            font-weight: bold;
+        }
+
+        .HIGH {
+            color: #ff9f43;
+            font-weight: bold;
+        }
+
+        .MEDIUM {
+            color: #ffd166;
+            font-weight: bold;
+        }
+
+        .LOW {
+            color: #5ee89e;
+            font-weight: bold;
+        }
+
+        .view-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .view-link:hover {
+            text-decoration: underline;
+        }
+
+        .empty-message {
+            padding: 30px;
+            background: #1f2937;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>HomeSOC</h1>
+
+        <div class="subtitle">
+            Residential Security Operations Center
+        </div>
+
+        <h2>Detected Incidents</h2>
+
+        {% if incidents %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Protected Asset</th>
+                        <th>Start Time</th>
+                        <th>Events</th>
+                        <th>Risk Score</th>
+                        <th>Severity</th>
+                        <th>Investigation</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for incident in incidents %}
+
+                    <tr>
+
+                        <td>
+                            #{{ "%04d"|format(incident["id"]) }}
+                        </td>
+
+                        <td>
+                            {{ incident["asset_ip"] }}
+                        </td>
+
+                        <td>
+                            {{ incident["start_time"] }}
+                        </td>
+
+                        <td>
+                            {{ incident["event_count"] }}
+                        </td>
+
+                        <td>
+                            {{ incident["total_score"] }}
+                        </td>
+
+                        <td class="{{ incident['severity'] }}">
+                            {{ incident["severity"] }}
+                        </td>
+
+                        <td>
+                            <a
+                                class="view-link"
+                                href="/incident/{{ incident['id'] }}"
+                            >
+                                View Incident
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-message">
+            No security incidents have been detected yet.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>
