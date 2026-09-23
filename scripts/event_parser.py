@@ -1,14 +1,17 @@
 from datetime import datetime
 
 
-def normalize_event(source, event_type, severity, src_ip, dst_ip, description):
-    """
-    Convert security events from different tools into
-    one common HomeSOC event format.
-    """
-
+def normalize_event(
+    source,
+    event_type,
+    severity,
+    src_ip,
+    dst_ip,
+    description,
+    timestamp=None
+):
     event = {
-        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "timestamp": timestamp or datetime.now().isoformat(timespec="seconds"),
         "source": source,
         "event_type": event_type,
         "severity": severity,
