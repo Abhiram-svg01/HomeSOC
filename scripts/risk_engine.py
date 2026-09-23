@@ -33,7 +33,8 @@ def create_security_event(
     event_type,
     src_ip,
     dst_ip,
-    description
+    description,
+    asset_ip=None
 ):
     score, severity = calculate_severity(event_type)
 
@@ -47,9 +48,9 @@ def create_security_event(
     )
 
     event["risk_score"] = score
+    event["asset_ip"] = asset_ip or dst_ip
 
     return event
-
 
 if __name__ == "__main__":
 
