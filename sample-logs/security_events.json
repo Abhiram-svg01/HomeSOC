@@ -1,0 +1,34 @@
+[
+  {
+    "source": "Suricata",
+    "event_type": "Network Scan",
+    "src_ip": "192.168.1.50",
+    "dst_ip": "192.168.1.10",
+    "asset_ip": "192.168.1.10",
+    "description": "Multiple connection attempts across several ports"
+  },
+  {
+    "source": "Wazuh",
+    "event_type": "Multiple Failed Logins",
+    "src_ip": "192.168.1.50",
+    "dst_ip": "192.168.1.10",
+    "asset_ip": "192.168.1.10",
+    "description": "Repeated authentication failures detected"
+  },
+  {
+    "source": "Zeek",
+    "event_type": "Suspicious DNS",
+    "src_ip": "192.168.1.10",
+    "dst_ip": "8.8.8.8",
+    "asset_ip": "192.168.1.10",
+    "description": "Unusual DNS activity observed"
+  },
+  {
+    "source": "Suricata",
+    "event_type": "Command and Control",
+    "src_ip": "192.168.1.10",
+    "dst_ip": "45.33.32.156",
+    "asset_ip": "192.168.1.10",
+    "description": "Possible command and control communication"
+  }
+]
