@@ -35,12 +35,98 @@
         .subtitle {
             color: #9ca3af;
             margin-top: 6px;
-            margin-bottom: 45px;
+            margin-bottom: 40px;
             font-size: 18px;
         }
 
         h2 {
+            margin-top: 35px;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        .summary-card {
+            background: #1f2937;
+            padding: 22px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+        }
+
+        .summary-label {
+            color: #9ca3af;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-value {
+            margin-top: 10px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .critical-value {
+            color: #ff5c5c;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
             margin-bottom: 25px;
+            background: #1f2937;
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+        }
+
+        input,
+        select {
+            background: #111827;
+            color: white;
+            border: 1px solid #4b5563;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+        }
+
+        input {
+            min-width: 240px;
+        }
+
+        button,
+        .clear-button {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .clear-button {
+            background: #374151;
+            color: white;
+            text-decoration: none;
+        }
+
+        .clear-button:hover {
+            background: #4b5563;
         }
 
         .table-wrapper {
@@ -103,8 +189,26 @@
             padding: 30px;
             background: #1f2937;
             color: #9ca3af;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 550px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            input {
+                width: 100%;
+            }
         }
     </style>
+
 </head>
 
 <body>
@@ -117,7 +221,126 @@
             Residential Security Operations Center
         </div>
 
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+                <div class="summary-label">
+                    Total Incidents
+                </div>
+
+                <div class="summary-value">
+                    {{ total_incidents }}
+                </div>
+            </div>
+
+
+            <div class="summary-card">
+                <div class="summary-label">
+                    Critical Incidents
+                </div>
+
+                <div class="summary-value critical-value">
+                    {{ critical_incidents }}
+                </div>
+            </div>
+
+
+            <div class="summary-card">
+                <div class="summary-label">
+                    Protected Assets
+                </div>
+
+                <div class="summary-value">
+                    {{ protected_assets }}
+                </div>
+            </div>
+
+
+            <div class="summary-card">
+                <div class="summary-label">
+                    Average Risk Score
+                </div>
+
+                <div class="summary-value">
+                    {{ average_risk }}
+                </div>
+            </div>
+
+        </div>
+
+
+        <h2>Incident Search</h2>
+
+        <form method="GET" action="/" class="filter-bar">
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search ID or asset IP"
+                value="{{ search_query }}"
+            >
+
+            <select name="severity">
+
+                <option value="">
+                    All Severities
+                </option>
+
+                <option
+                    value="CRITICAL"
+                    {% if severity_filter == "CRITICAL" %}
+                    selected
+                    {% endif %}
+                >
+                    Critical
+                </option>
+
+                <option
+                    value="HIGH"
+                    {% if severity_filter == "HIGH" %}
+                    selected
+                    {% endif %}
+                >
+                    High
+                </option>
+
+                <option
+                    value="MEDIUM"
+                    {% if severity_filter == "MEDIUM" %}
+                    selected
+                    {% endif %}
+                >
+                    Medium
+                </option>
+
+                <option
+                    value="LOW"
+                    {% if severity_filter == "LOW" %}
+                    selected
+                    {% endif %}
+                >
+                    Low
+                </option>
+
+            </select>
+
+            <button type="submit">
+                Apply Filters
+            </button>
+
+            <a
+                href="/"
+                class="clear-button"
+            >
+                Clear
+            </a>
+
+        </form>
+
+
         <h2>Detected Incidents</h2>
+
 
         {% if incidents %}
 
@@ -126,6 +349,7 @@
             <table>
 
                 <thead>
+
                     <tr>
                         <th>ID</th>
                         <th>Protected Asset</th>
@@ -135,6 +359,7 @@
                         <th>Severity</th>
                         <th>Investigation</th>
                     </tr>
+
                 </thead>
 
                 <tbody>
@@ -189,7 +414,7 @@
         {% else %}
 
         <div class="empty-message">
-            No security incidents have been detected yet.
+            No incidents match your current search or filters.
         </div>
 
         {% endif %}
