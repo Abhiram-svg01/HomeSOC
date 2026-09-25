@@ -1,7 +1,14 @@
 import sqlite3
 from pathlib import Path
 
-from flask import Flask, render_template, abort, request
+from flask import (
+    Flask,
+    render_template,
+    abort,
+    request,
+    redirect,
+    url_for
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -27,6 +34,13 @@ ATTACK_STAGES = {
 }
 
 
+VALID_STATUSES = {
+    "NEW",
+    "INVESTIGATING",
+    "RESOLVED"
+}
+
+
 def get_db_connection():
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
@@ -37,8 +51,15 @@ def get_db_connection():
 def dashboard():
     connection = get_db_connection()
 
-    severity_filter = request.args.get("severity", "").strip().upper()
-    search_query = request.args.get("search", "").strip()
+    severity_filter = request.args.get(
+        "severity",
+        ""
+    ).strip().upper()
+
+    search_query = request.args.get(
+        "search",
+        ""
+    ).strip()
 
     query = """
         SELECT *
@@ -52,10 +73,15 @@ def dashboard():
         query += """
             AND severity = ?
         """
+
         params.append(severity_filter)
 
     if search_query:
-        cleaned_search = search_query.replace("#", "").strip()
+        cleaned_search = (
+            search_query
+            .replace("#", "")
+            .strip()
+        )
 
         if cleaned_search.isdigit():
             query += """
@@ -65,10 +91,12 @@ def dashboard():
                 )
             """
 
-            params.extend([
-                int(cleaned_search),
-                f"%{search_query}%"
-            ])
+            params.extend(
+                [
+                    int(cleaned_search),
+                    f"%{search_query}%"
+                ]
+            )
 
         else:
             query += """
@@ -122,7 +150,10 @@ def dashboard():
     if average_risk is None:
         average_risk = 0
 
-    average_risk = round(average_risk, 1)
+    average_risk = round(
+        average_risk,
+        1
+    )
 
     return render_template(
         "dashboard.html",
@@ -181,6 +212,49 @@ def incident_details(incident_id):
         incident=incident,
         events=events,
         attack_progression=attack_progression
+    )
+
+
+@app.route(
+    "/incident/<int:incident_id>/status",
+    methods=["POST"]
+)
+def update_incident_status(incident_id):
+    new_status = request.form.get(
+        "status",
+        ""
+    ).strip().upper()
+
+    if new_status not in VALID_STATUSES:
+        abort(400)
+
+    connection = get_db_connection()
+
+    cursor = connection.execute(
+        """
+        UPDATE incidents
+        SET status = ?
+        WHERE id = ?
+        """,
+        (
+            new_status,
+            incident_id
+        )
+    )
+
+    connection.commit()
+
+    if cursor.rowcount == 0:
+        connection.close()
+        abort(404)
+
+    connection.close()
+
+    return redirect(
+        url_for(
+            "incident_details",
+            incident_id=incident_id
+        )
     )
 
 

@@ -2,424 +2,343 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>HomeSOC Dashboard</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+    <title>
+        HomeSOC Dashboard
+    </title>
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: #111827;
-            color: white;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 40px 0;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 42px;
-        }
-
-        .subtitle {
-            color: #9ca3af;
-            margin-top: 6px;
-            margin-bottom: 40px;
-            font-size: 18px;
-        }
-
-        h2 {
-            margin-top: 35px;
-            margin-bottom: 20px;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 35px;
-        }
-
-        .summary-card {
-            background: #1f2937;
-            padding: 22px;
-            border-radius: 8px;
-            border: 1px solid #374151;
-        }
-
-        .summary-label {
-            color: #9ca3af;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .summary-value {
-            margin-top: 10px;
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .critical-value {
-            color: #ff5c5c;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 25px;
-            background: #1f2937;
-            padding: 18px;
-            border-radius: 8px;
-            border: 1px solid #374151;
-        }
-
-        input,
-        select {
-            background: #111827;
-            color: white;
-            border: 1px solid #4b5563;
-            border-radius: 6px;
-            padding: 10px 12px;
-            font-size: 14px;
-        }
-
-        input {
-            min-width: 240px;
-        }
-
-        button,
-        .clear-button {
-            border: none;
-            border-radius: 6px;
-            padding: 10px 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button {
-            background: #2563eb;
-            color: white;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        .clear-button {
-            background: #374151;
-            color: white;
-            text-decoration: none;
-        }
-
-        .clear-button:hover {
-            background: #4b5563;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #1f2937;
-        }
-
-        th,
-        td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #374151;
-        }
-
-        th {
-            background: #111827;
-            font-size: 16px;
-        }
-
-        tr:hover {
-            background: #273449;
-        }
-
-        .CRITICAL {
-            color: #ff5c5c;
-            font-weight: bold;
-        }
-
-        .HIGH {
-            color: #ff9f43;
-            font-weight: bold;
-        }
-
-        .MEDIUM {
-            color: #ffd166;
-            font-weight: bold;
-        }
-
-        .LOW {
-            color: #5ee89e;
-            font-weight: bold;
-        }
-
-        .view-link {
-            color: #60a5fa;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .view-link:hover {
-            text-decoration: underline;
-        }
-
-        .empty-message {
-            padding: 30px;
-            background: #1f2937;
-            color: #9ca3af;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 900px) {
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 550px) {
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-
-            input {
-                width: 100%;
-            }
-        }
-    </style>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 
 </head>
 
+
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>HomeSOC</h1>
+    <h1>
+        HomeSOC
+    </h1>
 
-        <div class="subtitle">
-            Residential Security Operations Center
-        </div>
+    <div class="subtitle">
+        Residential Security Operations Center
+    </div>
 
 
-        <div class="summary-grid">
+    <!-- SUMMARY CARDS -->
 
-            <div class="summary-card">
-                <div class="summary-label">
-                    Total Incidents
-                </div>
+    <div class="summary-grid">
 
-                <div class="summary-value">
-                    {{ total_incidents }}
-                </div>
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Total Incidents
             </div>
 
-
-            <div class="summary-card">
-                <div class="summary-label">
-                    Critical Incidents
-                </div>
-
-                <div class="summary-value critical-value">
-                    {{ critical_incidents }}
-                </div>
-            </div>
-
-
-            <div class="summary-card">
-                <div class="summary-label">
-                    Protected Assets
-                </div>
-
-                <div class="summary-value">
-                    {{ protected_assets }}
-                </div>
-            </div>
-
-
-            <div class="summary-card">
-                <div class="summary-label">
-                    Average Risk Score
-                </div>
-
-                <div class="summary-value">
-                    {{ average_risk }}
-                </div>
+            <div class="summary-value">
+                {{ total_incidents }}
             </div>
 
         </div>
 
 
-        <h2>Incident Search</h2>
+        <div class="summary-card">
 
-        <form method="GET" action="/" class="filter-bar">
+            <div class="summary-label">
+                Critical Incidents
+            </div>
 
-            <input
-                type="text"
-                name="search"
-                placeholder="Search ID or asset IP"
-                value="{{ search_query }}"
-            >
-
-            <select name="severity">
-
-                <option value="">
-                    All Severities
-                </option>
-
-                <option
-                    value="CRITICAL"
-                    {% if severity_filter == "CRITICAL" %}
-                    selected
-                    {% endif %}
-                >
-                    Critical
-                </option>
-
-                <option
-                    value="HIGH"
-                    {% if severity_filter == "HIGH" %}
-                    selected
-                    {% endif %}
-                >
-                    High
-                </option>
-
-                <option
-                    value="MEDIUM"
-                    {% if severity_filter == "MEDIUM" %}
-                    selected
-                    {% endif %}
-                >
-                    Medium
-                </option>
-
-                <option
-                    value="LOW"
-                    {% if severity_filter == "LOW" %}
-                    selected
-                    {% endif %}
-                >
-                    Low
-                </option>
-
-            </select>
-
-            <button type="submit">
-                Apply Filters
-            </button>
-
-            <a
-                href="/"
-                class="clear-button"
-            >
-                Clear
-            </a>
-
-        </form>
-
-
-        <h2>Detected Incidents</h2>
-
-
-        {% if incidents %}
-
-        <div class="table-wrapper">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Protected Asset</th>
-                        <th>Start Time</th>
-                        <th>Events</th>
-                        <th>Risk Score</th>
-                        <th>Severity</th>
-                        <th>Investigation</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for incident in incidents %}
-
-                    <tr>
-
-                        <td>
-                            #{{ "%04d"|format(incident["id"]) }}
-                        </td>
-
-                        <td>
-                            {{ incident["asset_ip"] }}
-                        </td>
-
-                        <td>
-                            {{ incident["start_time"] }}
-                        </td>
-
-                        <td>
-                            {{ incident["event_count"] }}
-                        </td>
-
-                        <td>
-                            {{ incident["total_score"] }}
-                        </td>
-
-                        <td class="{{ incident['severity'] }}">
-                            {{ incident["severity"] }}
-                        </td>
-
-                        <td>
-                            <a
-                                class="view-link"
-                                href="/incident/{{ incident['id'] }}"
-                            >
-                                View Incident
-                            </a>
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
+            <div class="summary-value critical-value">
+                {{ critical_incidents }}
+            </div>
 
         </div>
 
-        {% else %}
 
-        <div class="empty-message">
-            No incidents match your current search or filters.
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Protected Assets
+            </div>
+
+            <div class="summary-value">
+                {{ protected_assets }}
+            </div>
+
         </div>
 
-        {% endif %}
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Average Risk Score
+            </div>
+
+            <div class="summary-value">
+                {{ average_risk }}
+            </div>
+
+        </div>
 
     </div>
+
+
+    <!-- SEARCH -->
+
+    <h2>
+        Incident Search
+    </h2>
+
+
+    <form
+        method="GET"
+        action="/"
+        class="filter-bar"
+    >
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Search incident ID or asset IP"
+            value="{{ search_query }}"
+        >
+
+
+        <select name="severity">
+
+            <option value="">
+                All Severities
+            </option>
+
+
+            <option
+                value="CRITICAL"
+                {% if severity_filter == "CRITICAL" %}
+                selected
+                {% endif %}
+            >
+                Critical
+            </option>
+
+
+            <option
+                value="HIGH"
+                {% if severity_filter == "HIGH" %}
+                selected
+                {% endif %}
+            >
+                High
+            </option>
+
+
+            <option
+                value="MEDIUM"
+                {% if severity_filter == "MEDIUM" %}
+                selected
+                {% endif %}
+            >
+                Medium
+            </option>
+
+
+            <option
+                value="LOW"
+                {% if severity_filter == "LOW" %}
+                selected
+                {% endif %}
+            >
+                Low
+            </option>
+
+        </select>
+
+
+        <button type="submit">
+            Apply Filters
+        </button>
+
+
+        <a
+            href="/"
+            class="clear-button"
+        >
+            Clear
+        </a>
+
+    </form>
+
+
+    <!-- INCIDENT TABLE -->
+
+    <h2>
+        Detected Incidents
+    </h2>
+
+
+    {% if incidents %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>
+                        Protected Asset
+                    </th>
+
+                    <th>
+                        Start Time
+                    </th>
+
+                    <th>
+                        Events
+                    </th>
+
+                    <th>
+                        Risk Score
+                    </th>
+
+                    <th>
+                        Severity
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Investigation
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for incident in incidents %}
+
+                <tr>
+
+                    <td>
+
+                        #{{ "%04d"|format(incident["id"]) }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ incident["asset_ip"] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ incident["start_time"] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ incident["event_count"] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ incident["total_score"] }}
+
+                    </td>
+
+
+                    <td class="{{ incident['severity'] }}">
+
+                        {{ incident["severity"] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if incident["status"] == "NEW" %}
+
+                            <span class="status-badge status-new">
+                                NEW
+                            </span>
+
+                        {% elif incident["status"] == "INVESTIGATING" %}
+
+                            <span class="status-badge status-investigating">
+                                INVESTIGATING
+                            </span>
+
+                        {% elif incident["status"] == "RESOLVED" %}
+
+                            <span class="status-badge status-resolved">
+                                RESOLVED
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            class="view-link"
+                            href="/incident/{{ incident['id'] }}"
+                        >
+
+                            View Incident
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+    <div class="empty-message">
+
+        No incidents match your current search or filters.
+
+    </div>
+
+    {% endif %}
+
+
+</div>
 
 </body>
 

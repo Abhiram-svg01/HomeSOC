@@ -29,7 +29,8 @@ def init_database():
             end_time TEXT NOT NULL,
             total_score INTEGER NOT NULL,
             severity TEXT NOT NULL,
-            event_count INTEGER NOT NULL
+            event_count INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'NEW'
         )
         """
     )
@@ -54,6 +55,21 @@ def init_database():
         """
     )
 
+    # Upgrade older HomeSOC databases automatically
+    cursor.execute("PRAGMA table_info(incidents)")
+    columns = {
+        row["name"]
+        for row in cursor.fetchall()
+    }
+
+    if "status" not in columns:
+        cursor.execute(
+            """
+            ALTER TABLE incidents
+            ADD COLUMN status TEXT NOT NULL DEFAULT 'NEW'
+            """
+        )
+
     connection.commit()
     connection.close()
 
@@ -62,7 +78,6 @@ def save_incident(incident):
     connection = get_connection()
     cursor = connection.cursor()
 
-    # Check whether this exact incident already exists
     existing = cursor.execute(
         """
         SELECT id
@@ -82,7 +97,6 @@ def save_incident(incident):
         )
     ).fetchone()
 
-    # If it already exists, do not insert it again
     if existing:
         connection.close()
         return existing["id"]
@@ -99,9 +113,10 @@ def save_incident(incident):
             end_time,
             total_score,
             severity,
-            event_count
+            event_count,
+            status
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
             incident["asset_ip"],
@@ -109,7 +124,8 @@ def save_incident(incident):
             incident["end_time"],
             incident["total_score"],
             severity,
-            len(incident["events"])
+            len(incident["events"]),
+            "NEW"
         )
     )
 

@@ -1,0 +1,403 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111827;
+    color: #f9fafb;
+}
+
+.container {
+    width: 95%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+
+/* ------------------------------
+   Typography
+------------------------------ */
+
+h1 {
+    margin: 0;
+    font-size: 42px;
+}
+
+h2 {
+    margin-top: 35px;
+    margin-bottom: 20px;
+}
+
+h3 {
+    margin-top: 8px;
+}
+
+.subtitle {
+    color: #9ca3af;
+    margin-top: 6px;
+    margin-bottom: 35px;
+    font-size: 17px;
+}
+
+.label {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.value {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+/* ------------------------------
+   Links
+------------------------------ */
+
+a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.view-link {
+    color: #60a5fa;
+    font-weight: bold;
+}
+
+
+/* ------------------------------
+   Dashboard summary cards
+------------------------------ */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 35px;
+}
+
+.summary-card {
+    background: #1f2937;
+    padding: 22px;
+    border-radius: 8px;
+    border: 1px solid #374151;
+}
+
+.summary-label {
+    color: #9ca3af;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.summary-value {
+    margin-top: 10px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.critical-value {
+    color: #ff5c5c;
+}
+
+
+/* ------------------------------
+   Search / filter controls
+------------------------------ */
+
+.filter-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 25px;
+
+    background: #1f2937;
+    padding: 18px;
+
+    border-radius: 8px;
+    border: 1px solid #374151;
+}
+
+input,
+select {
+    background: #111827;
+    color: white;
+
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+input {
+    min-width: 240px;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+
+    border: none;
+    border-radius: 6px;
+
+    padding: 10px 16px;
+
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.clear-button {
+    background: #374151;
+    color: white;
+
+    border-radius: 6px;
+    padding: 10px 16px;
+
+    font-weight: bold;
+}
+
+.clear-button:hover {
+    background: #4b5563;
+    text-decoration: none;
+}
+
+
+/* ------------------------------
+   Tables
+------------------------------ */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1f2937;
+}
+
+th,
+td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #374151;
+}
+
+th {
+    background: #111827;
+    font-size: 15px;
+}
+
+tr:hover {
+    background: #273449;
+}
+
+
+/* ------------------------------
+   Severity
+------------------------------ */
+
+.CRITICAL {
+    color: #ff5c5c;
+    font-weight: bold;
+}
+
+.HIGH {
+    color: #ff9f43;
+    font-weight: bold;
+}
+
+.MEDIUM {
+    color: #ffd166;
+    font-weight: bold;
+}
+
+.LOW {
+    color: #5ee89e;
+    font-weight: bold;
+}
+
+
+/* ------------------------------
+   Incident page
+------------------------------ */
+
+.incident-card {
+    margin-top: 20px;
+
+    background: #1f2937;
+    padding: 24px;
+
+    border: 1px solid #374151;
+    border-radius: 8px;
+}
+
+.incident-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.summary-box {
+    background: #111827;
+    padding: 16px;
+    border-radius: 6px;
+}
+
+
+/* ------------------------------
+   Attack progression
+------------------------------ */
+
+.attack-chain {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.stage {
+    background: #1f2937;
+
+    padding: 14px 18px;
+
+    border-radius: 8px;
+    border: 1px solid #374151;
+
+    font-weight: bold;
+}
+
+.arrow {
+    color: #60a5fa;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+
+/* ------------------------------
+   Evidence cards
+------------------------------ */
+
+.evidence-card {
+    margin-top: 14px;
+
+    background: #1f2937;
+
+    padding: 18px;
+
+    border: 1px solid #374151;
+    border-radius: 8px;
+}
+
+.description {
+    color: #d1d5db;
+}
+
+
+/* ------------------------------
+   Workflow status
+------------------------------ */
+
+.workflow-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    margin-top: 15px;
+}
+
+.status-badge {
+    display: inline-block;
+
+    padding: 7px 12px;
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    margin-top: 5px;
+}
+
+.status-new {
+    background: #374151;
+}
+
+.status-investigating {
+    background: #92400e;
+    color: #fef3c7;
+}
+
+.status-resolved {
+    background: #065f46;
+    color: #d1fae5;
+}
+
+
+/* ------------------------------
+   Empty state
+------------------------------ */
+
+.empty-message {
+    padding: 30px;
+
+    background: #1f2937;
+    color: #9ca3af;
+
+    border-radius: 8px;
+}
+
+
+/* ------------------------------
+   Responsive
+------------------------------ */
+
+@media (max-width: 900px) {
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .incident-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .summary-grid,
+    .incident-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    .container {
+        width: 92%;
+    }
+
+    h1 {
+        font-size: 34px;
+    }
+}
