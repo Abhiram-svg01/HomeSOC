@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,335 +9,518 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        HomeSOC Dashboard
-    </title>
+    <title>HomeSOC Dashboard</title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
-
 </head>
-
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <h1>
-        HomeSOC
-    </h1>
+        <!-- =========================
+             HEADER
+        ========================== -->
 
-    <div class="subtitle">
-        Residential Security Operations Center
-    </div>
+        <header class="page-header">
+
+            <h1>
+                HomeSOC
+            </h1>
+
+            <p>
+                Residential Security Operations Center
+            </p>
+
+        </header>
 
 
-    <!-- SUMMARY CARDS -->
+        <!-- =========================
+             PRIMARY METRICS
+        ========================== -->
 
-    <div class="summary-grid">
+        <section class="summary-grid">
 
-        <div class="summary-card">
+            <div class="summary-card">
 
-            <div class="summary-label">
-                Total Incidents
+                <span class="summary-label">
+                    Total Incidents
+                </span>
+
+                <span class="summary-value">
+                    {{ total_incidents }}
+                </span>
+
             </div>
 
-            <div class="summary-value">
-                {{ total_incidents }}
+
+            <div class="summary-card">
+
+                <span class="summary-label">
+                    Critical Incidents
+                </span>
+
+                <span class="summary-value critical-number">
+                    {{ critical_incidents }}
+                </span>
+
             </div>
 
-        </div>
 
+            <div class="summary-card">
 
-        <div class="summary-card">
+                <span class="summary-label">
+                    Protected Assets
+                </span>
 
-            <div class="summary-label">
-                Critical Incidents
+                <span class="summary-value">
+                    {{ protected_assets }}
+                </span>
+
             </div>
 
-            <div class="summary-value critical-value">
-                {{ critical_incidents }}
+
+            <div class="summary-card">
+
+                <span class="summary-label">
+                    Average Risk Score
+                </span>
+
+                <span class="summary-value">
+                    {{ average_risk }}
+                </span>
+
             </div>
 
-        </div>
+        </section>
 
 
-        <div class="summary-card">
+        <!-- =========================
+             CORRELATION METRICS
+        ========================== -->
 
-            <div class="summary-label">
-                Protected Assets
+        <section class="section-block">
+
+            <h2>
+                Correlation Intelligence
+            </h2>
+
+            <div class="summary-grid">
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Raw Alerts
+                    </span>
+
+                    <span class="summary-value">
+                        {{ total_raw_events }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Unique Signals
+                    </span>
+
+                    <span class="summary-value">
+                        {{ total_unique_signals }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Duplicates Suppressed
+                    </span>
+
+                    <span class="summary-value">
+                        {{ total_duplicates_suppressed }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Corroboration Bonus
+                    </span>
+
+                    <span class="summary-value">
+                        +{{ total_corroboration_bonus }}
+                    </span>
+
+                </div>
+
             </div>
 
-            <div class="summary-value">
-                {{ protected_assets }}
-            </div>
-
-        </div>
+        </section>
 
 
-        <div class="summary-card">
+        <!-- =========================
+             SEARCH
+        ========================== -->
 
-            <div class="summary-label">
-                Average Risk Score
-            </div>
+        <section class="section-block">
 
-            <div class="summary-value">
-                {{ average_risk }}
-            </div>
+            <h2>
+                Incident Search
+            </h2>
 
-        </div>
-
-    </div>
-
-
-    <!-- SEARCH -->
-
-    <h2>
-        Incident Search
-    </h2>
-
-
-    <form
-        method="GET"
-        action="/"
-        class="filter-bar"
-    >
-
-        <input
-            type="text"
-            name="search"
-            placeholder="Search incident ID or asset IP"
-            value="{{ search_query }}"
-        >
-
-
-        <select name="severity">
-
-            <option value="">
-                All Severities
-            </option>
-
-
-            <option
-                value="CRITICAL"
-                {% if severity_filter == "CRITICAL" %}
-                selected
-                {% endif %}
+            <form
+                method="GET"
+                action="{{ url_for('dashboard') }}"
+                class="filter-card"
             >
-                Critical
-            </option>
 
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search incident ID, asset IP, or source"
+                    value="{{ search_query }}"
+                >
 
-            <option
-                value="HIGH"
-                {% if severity_filter == "HIGH" %}
-                selected
-                {% endif %}
-            >
-                High
-            </option>
 
+                <select name="severity">
 
-            <option
-                value="MEDIUM"
-                {% if severity_filter == "MEDIUM" %}
-                selected
-                {% endif %}
-            >
-                Medium
-            </option>
-
-
-            <option
-                value="LOW"
-                {% if severity_filter == "LOW" %}
-                selected
-                {% endif %}
-            >
-                Low
-            </option>
-
-        </select>
-
-
-        <button type="submit">
-            Apply Filters
-        </button>
-
-
-        <a
-            href="/"
-            class="clear-button"
-        >
-            Clear
-        </a>
-
-    </form>
-
-
-    <!-- INCIDENT TABLE -->
-
-    <h2>
-        Detected Incidents
-    </h2>
-
-
-    {% if incidents %}
-
-    <div class="table-wrapper">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>ID</th>
-
-                    <th>
-                        Protected Asset
-                    </th>
-
-                    <th>
-                        Start Time
-                    </th>
-
-                    <th>
-                        Events
-                    </th>
-
-                    <th>
-                        Risk Score
-                    </th>
-
-                    <th>
-                        Severity
-                    </th>
-
-                    <th>
-                        Status
-                    </th>
-
-                    <th>
-                        Investigation
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                {% for incident in incidents %}
-
-                <tr>
-
-                    <td>
-
-                        #{{ "%04d"|format(incident["id"]) }}
-
-                    </td>
-
-
-                    <td>
-
-                        {{ incident["asset_ip"] }}
-
-                    </td>
-
-
-                    <td>
-
-                        {{ incident["start_time"] }}
-
-                    </td>
-
-
-                    <td>
-
-                        {{ incident["event_count"] }}
-
-                    </td>
-
-
-                    <td>
-
-                        {{ incident["total_score"] }}
-
-                    </td>
-
-
-                    <td class="{{ incident['severity'] }}">
-
-                        {{ incident["severity"] }}
-
-                    </td>
-
-
-                    <td>
-
-                        {% if incident["status"] == "NEW" %}
-
-                            <span class="status-badge status-new">
-                                NEW
-                            </span>
-
-                        {% elif incident["status"] == "INVESTIGATING" %}
-
-                            <span class="status-badge status-investigating">
-                                INVESTIGATING
-                            </span>
-
-                        {% elif incident["status"] == "RESOLVED" %}
-
-                            <span class="status-badge status-resolved">
-                                RESOLVED
-                            </span>
-
+                    <option
+                        value=""
+                        {% if not severity_filter %}
+                            selected
                         {% endif %}
+                    >
+                        All Severities
+                    </option>
 
-                    </td>
+
+                    <option
+                        value="CRITICAL"
+                        {% if severity_filter == "CRITICAL" %}
+                            selected
+                        {% endif %}
+                    >
+                        Critical
+                    </option>
 
 
-                    <td>
+                    <option
+                        value="HIGH"
+                        {% if severity_filter == "HIGH" %}
+                            selected
+                        {% endif %}
+                    >
+                        High
+                    </option>
 
-                        <a
-                            class="view-link"
-                            href="/incident/{{ incident['id'] }}"
-                        >
 
-                            View Incident
+                    <option
+                        value="MEDIUM"
+                        {% if severity_filter == "MEDIUM" %}
+                            selected
+                        {% endif %}
+                    >
+                        Medium
+                    </option>
 
-                        </a>
 
-                    </td>
+                    <option
+                        value="LOW"
+                        {% if severity_filter == "LOW" %}
+                            selected
+                        {% endif %}
+                    >
+                        Low
+                    </option>
 
-                </tr>
+                </select>
 
-                {% endfor %}
 
-            </tbody>
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    Apply Filters
+                </button>
 
-        </table>
+
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="secondary-button"
+                >
+                    Clear
+                </a>
+
+            </form>
+
+        </section>
+
+
+        <!-- =========================
+             INCIDENT TABLE
+        ========================== -->
+
+        <section class="section-block">
+
+            <h2>
+                Detected Incidents
+            </h2>
+
+
+            {% if incidents %}
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    ID
+                                </th>
+
+                                <th>
+                                    Protected Asset
+                                </th>
+
+                                <th>
+                                    Sources
+                                </th>
+
+                                <th>
+                                    Start Time
+                                </th>
+
+                                <th>
+                                    Raw Alerts
+                                </th>
+
+                                <th>
+                                    Signals
+                                </th>
+
+                                <th>
+                                    Risk Score
+                                </th>
+
+                                <th>
+                                    Severity
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Investigation
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for incident in incidents %}
+
+                                <tr>
+
+                                    <!-- INCIDENT ID -->
+
+                                    <td>
+
+                                        #{{ "%04d"|format(incident["id"]) }}
+
+                                    </td>
+
+
+                                    <!-- PROTECTED ASSET -->
+
+                                    <td>
+
+                                        {{ incident["asset_ip"] }}
+
+                                    </td>
+
+
+                                    <!-- SECURITY SOURCES -->
+
+                                    <td class="source-cell">
+
+                                        {% if incident["sources"] %}
+
+                                            {% for source in incident["sources"].split(", ") %}
+
+                                                <span
+                                                    class="source-badge source-{{ source|lower }}"
+                                                >
+                                                    {{ source }}
+                                                </span>
+
+                                            {% endfor %}
+
+                                        {% else %}
+
+                                            <span
+                                                class="source-badge source-legacy"
+                                            >
+                                                Legacy
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- START TIME -->
+
+                                    <td>
+
+                                        {{ incident["start_time"] }}
+
+                                    </td>
+
+
+                                    <!-- RAW EVENTS -->
+
+                                    <td>
+
+                                        {{ incident["event_count"] }}
+
+                                    </td>
+
+
+                                    <!-- UNIQUE SIGNALS -->
+
+                                    <td>
+
+                                        {% if incident["signal_count"] %}
+
+                                            {{ incident["signal_count"] }}
+
+                                        {% else %}
+
+                                            {{ incident["event_count"] }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- RISK SCORE -->
+
+                                    <td>
+
+                                        {{ incident["total_score"] }}
+
+                                    </td>
+
+
+                                    <!-- SEVERITY -->
+
+                                    <td>
+
+                                        <span
+                                            class="severity-badge {{ incident['severity'] }}"
+                                        >
+
+                                            {{ incident["severity"] }}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        {% if incident["status"] == "NEW" %}
+
+                                            <span class="status-new">
+
+                                                NEW
+
+                                            </span>
+
+
+                                        {% elif incident["status"] == "INVESTIGATING" %}
+
+                                            <span class="status-investigating">
+
+                                                INVESTIGATING
+
+                                            </span>
+
+
+                                        {% elif incident["status"] == "RESOLVED" %}
+
+                                            <span class="status-resolved">
+
+                                                RESOLVED
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- INVESTIGATION -->
+
+                                    <td>
+
+                                        <a
+                                            href="{{ url_for(
+                                                'incident_details',
+                                                incident_id=incident['id']
+                                            ) }}"
+                                            class="incident-link"
+                                        >
+
+                                            View Incident
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <p>
+                        No incidents matched the current filters.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
 
     </div>
-
-
-    {% else %}
-
-    <div class="empty-message">
-
-        No incidents match your current search or filters.
-
-    </div>
-
-    {% endif %}
-
-
-</div>
 
 </body>
 

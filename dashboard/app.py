@@ -44,6 +44,7 @@ VALID_STATUSES = {
 def get_db_connection():
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
+
     return connection
 
 
@@ -69,12 +70,22 @@ def dashboard():
 
     params = []
 
+    # ----------------------------
+    # Severity filter
+    # ----------------------------
+
     if severity_filter:
         query += """
             AND severity = ?
         """
 
-        params.append(severity_filter)
+        params.append(
+            severity_filter
+        )
+
+    # ----------------------------
+    # Search
+    # ----------------------------
 
     if search_query:
         cleaned_search = (
@@ -84,28 +95,34 @@ def dashboard():
         )
 
         if cleaned_search.isdigit():
+
             query += """
                 AND (
                     id = ?
                     OR asset_ip LIKE ?
+                    OR sources LIKE ?
                 )
             """
 
-            params.extend(
-                [
-                    int(cleaned_search),
-                    f"%{search_query}%"
-                ]
-            )
+            params.extend([
+                int(cleaned_search),
+                f"%{search_query}%",
+                f"%{search_query}%"
+            ])
 
         else:
+
             query += """
-                AND asset_ip LIKE ?
+                AND (
+                    asset_ip LIKE ?
+                    OR sources LIKE ?
+                )
             """
 
-            params.append(
+            params.extend([
+                f"%{search_query}%",
                 f"%{search_query}%"
-            )
+            ])
 
     query += """
         ORDER BY id DESC
@@ -116,34 +133,72 @@ def dashboard():
         params
     ).fetchall()
 
-    total_incidents = connection.execute(
-        """
+    # ----------------------------
+    # Main dashboard metrics
+    # ----------------------------
+
+    total_incidents = connection.execute("""
         SELECT COUNT(*) AS count
         FROM incidents
-        """
-    ).fetchone()["count"]
+    """).fetchone()["count"]
 
-    critical_incidents = connection.execute(
-        """
+    critical_incidents = connection.execute("""
         SELECT COUNT(*) AS count
         FROM incidents
         WHERE severity = 'CRITICAL'
-        """
-    ).fetchone()["count"]
+    """).fetchone()["count"]
 
-    protected_assets = connection.execute(
-        """
-        SELECT COUNT(DISTINCT asset_ip) AS count
+    protected_assets = connection.execute("""
+        SELECT COUNT(
+            DISTINCT asset_ip
+        ) AS count
         FROM incidents
-        """
-    ).fetchone()["count"]
+    """).fetchone()["count"]
 
-    average_risk = connection.execute(
-        """
+    average_risk = connection.execute("""
         SELECT AVG(total_score) AS average
         FROM incidents
-        """
-    ).fetchone()["average"]
+    """).fetchone()["average"]
+
+    # ----------------------------
+    # Correlation metrics
+    # ----------------------------
+
+    total_raw_events = connection.execute("""
+        SELECT
+            COALESCE(
+                SUM(event_count),
+                0
+            ) AS total
+        FROM incidents
+    """).fetchone()["total"]
+
+    total_unique_signals = connection.execute("""
+        SELECT
+            COALESCE(
+                SUM(signal_count),
+                0
+            ) AS total
+        FROM incidents
+    """).fetchone()["total"]
+
+    total_duplicates_suppressed = connection.execute("""
+        SELECT
+            COALESCE(
+                SUM(suppressed_duplicates),
+                0
+            ) AS total
+        FROM incidents
+    """).fetchone()["total"]
+
+    total_corroboration_bonus = connection.execute("""
+        SELECT
+            COALESCE(
+                SUM(corroboration_bonus),
+                0
+            ) AS total
+        FROM incidents
+    """).fetchone()["total"]
 
     connection.close()
 
@@ -157,18 +212,34 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
+
         incidents=incidents,
+
         total_incidents=total_incidents,
         critical_incidents=critical_incidents,
         protected_assets=protected_assets,
         average_risk=average_risk,
+
+        total_raw_events=total_raw_events,
+        total_unique_signals=total_unique_signals,
+        total_duplicates_suppressed=(
+            total_duplicates_suppressed
+        ),
+        total_corroboration_bonus=(
+            total_corroboration_bonus
+        ),
+
         severity_filter=severity_filter,
         search_query=search_query
     )
 
 
-@app.route("/incident/<int:incident_id>")
-def incident_details(incident_id):
+@app.route(
+    "/incident/<int:incident_id>"
+)
+def incident_details(
+    incident_id
+):
     connection = get_db_connection()
 
     incident = connection.execute(
@@ -199,13 +270,16 @@ def incident_details(incident_id):
     attack_progression = []
 
     for event in events:
+
         stage = ATTACK_STAGES.get(
             event["event_type"],
             "Unknown"
         )
 
         if stage not in attack_progression:
-            attack_progression.append(stage)
+            attack_progression.append(
+                stage
+            )
 
     return render_template(
         "incident.html",
@@ -219,7 +293,9 @@ def incident_details(incident_id):
     "/incident/<int:incident_id>/status",
     methods=["POST"]
 )
-def update_incident_status(incident_id):
+def update_incident_status(
+    incident_id
+):
     new_status = request.form.get(
         "status",
         ""
@@ -259,4 +335,6 @@ def update_incident_status(incident_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        debug=True
+    )
