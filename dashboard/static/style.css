@@ -1,20 +1,18 @@
 /* ========================================
-   HOMESOC GLOBAL STYLES
+   GLOBAL
 ======================================== */
 
 * {
     box-sizing: border-box;
 }
 
-html {
+html,
+body {
     margin: 0;
     padding: 0;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-
     background: #0f1726;
     color: #f1f5f9;
 
@@ -46,15 +44,14 @@ a {
 ======================================== */
 
 .page-header {
-    margin-bottom: 42px;
+    margin-bottom: 36px;
 }
 
 .page-header h1 {
     margin: 0;
 
-    font-size: 54px;
+    font-size: 52px;
     font-weight: 700;
-    letter-spacing: -1px;
 
     color: #f8fafc;
 }
@@ -62,32 +59,30 @@ a {
 .page-header p {
     margin-top: 8px;
 
-    font-size: 20px;
+    font-size: 19px;
 
     color: #9fb3d1;
 }
 
 
 /* ========================================
-   SECTION HEADINGS
+   SECTIONS
 ======================================== */
 
 .section-block {
     margin-top: 42px;
 }
 
-.section-block h2 {
-    margin: 0 0 24px;
-
-    font-size: 30px;
-    font-weight: 700;
+.section-block h2,
+.incident-card h2 {
+    margin-top: 0;
 
     color: #f8fafc;
 }
 
 
 /* ========================================
-   SUMMARY / METRIC CARDS
+   DASHBOARD METRICS
 ======================================== */
 
 .summary-grid {
@@ -100,9 +95,9 @@ a {
 }
 
 .summary-card {
-    min-height: 132px;
+    min-height: 130px;
 
-    padding: 27px 28px;
+    padding: 26px 28px;
 
     display: flex;
     flex-direction: column;
@@ -112,28 +107,25 @@ a {
 
     border: 1px solid #344255;
     border-radius: 10px;
-
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.12);
 }
 
 .summary-label {
-    margin-bottom: 12px;
-
-    font-size: 15px;
-    font-weight: 500;
-
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    margin-bottom: 10px;
 
     color: #9fb3d1;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    font-size: 14px;
 }
 
 .summary-value {
+    color: #ffffff;
+
     font-size: 38px;
     font-weight: 700;
-
-    color: #ffffff;
 }
 
 .critical-number {
@@ -142,19 +134,15 @@ a {
 
 
 /* ========================================
-   SEARCH / FILTER PANEL
+   SEARCH
 ======================================== */
 
 .filter-card {
-    width: 100%;
-
     padding: 24px;
 
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-
     gap: 15px;
+    flex-wrap: wrap;
 
     background: #1d2939;
 
@@ -162,52 +150,36 @@ a {
     border-radius: 10px;
 }
 
-.filter-card input {
-    width: 300px;
+.filter-card input,
+.filter-card select {
     min-height: 48px;
 
     padding: 0 15px;
 
     background: #111a2a;
-
     color: #f8fafc;
 
     border: 1px solid #45546a;
     border-radius: 7px;
 
     font-size: 16px;
+}
 
-    outline: none;
+.filter-card input {
+    width: 310px;
 }
 
 .filter-card input::placeholder {
     color: #71829b;
 }
 
-.filter-card input:focus {
-    border-color: #3b82f6;
-}
 
-.filter-card select {
-    min-width: 160px;
-    min-height: 48px;
-
-    padding: 0 14px;
-
-    background: #111a2a;
-
-    color: #f8fafc;
-
-    border: 1px solid #45546a;
-    border-radius: 7px;
-
-    font-size: 16px;
-
-    outline: none;
-}
+/* ========================================
+   BUTTONS
+======================================== */
 
 .primary-button {
-    min-height: 48px;
+    min-height: 46px;
 
     padding: 0 20px;
 
@@ -221,7 +193,7 @@ a {
     border: none;
     border-radius: 7px;
 
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
 
     cursor: pointer;
@@ -232,7 +204,7 @@ a {
 }
 
 .secondary-button {
-    min-height: 48px;
+    min-height: 46px;
 
     padding: 0 20px;
 
@@ -241,41 +213,27 @@ a {
     justify-content: center;
 
     background: #39485c;
-    color: #ffffff;
+    color: white;
 
     border-radius: 7px;
 
-    font-size: 16px;
     font-weight: 700;
-}
-
-.secondary-button:hover {
-    background: #47586f;
 }
 
 
 /* ========================================
-   INCIDENT TABLE
+   DASHBOARD TABLE
 ======================================== */
 
 .table-wrapper {
     width: 100%;
-
     overflow-x: auto;
-
-    border-radius: 8px;
 }
 
 table {
     width: 100%;
 
     border-collapse: collapse;
-
-    background: transparent;
-}
-
-thead {
-    background: #0f1726;
 }
 
 th {
@@ -283,33 +241,25 @@ th {
 
     text-align: left;
 
-    font-size: 15px;
-    font-weight: 700;
-
-    white-space: nowrap;
-
     color: #f8fafc;
 
     border-bottom: 1px solid #344255;
+
+    white-space: nowrap;
 }
 
 td {
     padding: 20px;
 
-    font-size: 15px;
-
-    white-space: nowrap;
-
     color: #f1f5f9;
 
     border-bottom: 1px solid #344255;
+
+    white-space: nowrap;
 }
 
 tbody tr {
     background: #1d2939;
-
-    transition:
-        background 0.15s ease;
 }
 
 tbody tr:nth-child(even) {
@@ -322,30 +272,70 @@ tbody tr:hover {
 
 
 /* ========================================
-   INCIDENT LINKS
+   SOURCE BADGES
 ======================================== */
 
-.incident-link {
-    color: #4da3ff;
-
-    font-weight: 700;
+.source-cell {
+    min-width: 220px;
 }
 
-.incident-link:hover {
-    text-decoration: underline;
+.source-badge {
+    display: inline-block;
+
+    padding: 6px 10px;
+    margin: 3px 4px 3px 0;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    border: 1px solid transparent;
+}
+
+.source-suricata {
+    background: rgba(255, 99, 71, 0.12);
+
+    border-color:
+        rgba(255, 99, 71, 0.45);
+
+    color: #ff7a66;
+}
+
+.source-zeek {
+    background: rgba(55, 150, 255, 0.12);
+
+    border-color:
+        rgba(55, 150, 255, 0.45);
+
+    color: #63adff;
+}
+
+.source-wazuh {
+    background: rgba(92, 220, 150, 0.12);
+
+    border-color:
+        rgba(92, 220, 150, 0.45);
+
+    color: #69dfa0;
+}
+
+.source-legacy {
+    background: rgba(150, 160, 175, 0.12);
+
+    border-color:
+        rgba(150, 160, 175, 0.35);
+
+    color: #aab3c2;
 }
 
 
 /* ========================================
-   SEVERITY BADGES
+   SEVERITY
 ======================================== */
 
 .severity-badge {
-    display: inline-block;
-
     font-weight: 800;
-
-    letter-spacing: 0.3px;
 }
 
 .CRITICAL {
@@ -366,7 +356,7 @@ tbody tr:hover {
 
 
 /* ========================================
-   INCIDENT STATUS BADGES
+   STATUS
 ======================================== */
 
 .status-new,
@@ -388,140 +378,49 @@ tbody tr:hover {
 }
 
 .status-investigating {
-    background: rgba(255, 173, 51, 0.14);
-
-    border: 1px solid
-        rgba(255, 173, 51, 0.35);
+    background:
+        rgba(255, 173, 51, 0.14);
 
     color: #ffbd59;
 }
 
 .status-resolved {
-    background: rgba(76, 211, 146, 0.14);
-
-    border: 1px solid
-        rgba(76, 211, 146, 0.35);
+    background:
+        rgba(76, 211, 146, 0.14);
 
     color: #62dfa2;
 }
 
 
 /* ========================================
-   SECURITY TELEMETRY SOURCE BADGES
+   LINKS
 ======================================== */
 
-.source-cell {
-    min-width: 220px;
-}
-
-.source-badge {
-    display: inline-block;
-
-    padding: 6px 10px;
-
-    margin: 3px 4px 3px 0;
-
-    border-radius: 6px;
-
-    font-size: 12px;
-    font-weight: 700;
-
-    letter-spacing: 0.4px;
-
-    border: 1px solid transparent;
-}
-
-
-/* Suricata */
-
-.source-suricata {
-    background:
-        rgba(255, 99, 71, 0.12);
-
-    border-color:
-        rgba(255, 99, 71, 0.45);
-
-    color: #ff7a66;
-}
-
-
-/* Zeek */
-
-.source-zeek {
-    background:
-        rgba(55, 150, 255, 0.12);
-
-    border-color:
-        rgba(55, 150, 255, 0.45);
-
-    color: #63adff;
-}
-
-
-/* Wazuh */
-
-.source-wazuh {
-    background:
-        rgba(92, 220, 150, 0.12);
-
-    border-color:
-        rgba(92, 220, 150, 0.45);
-
-    color: #69dfa0;
-}
-
-
-/* Legacy */
-
-.source-legacy {
-    background:
-        rgba(150, 160, 175, 0.12);
-
-    border-color:
-        rgba(150, 160, 175, 0.35);
-
-    color: #aab3c2;
-}
-
-
-/* ========================================
-   EMPTY STATE
-======================================== */
-
-.empty-state {
-    padding: 40px;
-
-    text-align: center;
-
-    background: #1d2939;
-
-    border: 1px solid #344255;
-    border-radius: 10px;
-
-    color: #9fb3d1;
-}
-
-
-/* ========================================
-   INCIDENT DETAILS PAGE
-======================================== */
-
+.incident-link,
 .back-link {
-    display: inline-block;
-
-    margin-bottom: 25px;
-
     color: #4da3ff;
 
-    font-weight: 600;
+    font-weight: 700;
 }
 
+.incident-link:hover,
 .back-link:hover {
     text-decoration: underline;
 }
 
+.back-link {
+    display: inline-block;
+
+    margin-bottom: 28px;
+}
+
+
+/* ========================================
+   INCIDENT CARDS
+======================================== */
+
 .incident-card {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 
     padding: 28px;
 
@@ -531,16 +430,9 @@ tbody tr:hover {
     border-radius: 10px;
 }
 
-.incident-card h2,
-.incident-card h3 {
-    margin-top: 0;
-
-    color: #f8fafc;
-}
-
 
 /* ========================================
-   INCIDENT SUMMARY GRID
+   INCIDENT SUMMARY
 ======================================== */
 
 .incident-summary-grid {
@@ -568,20 +460,20 @@ tbody tr:hover {
 
     margin-bottom: 8px;
 
+    color: #91a3bc;
+
     font-size: 12px;
     font-weight: 600;
 
     text-transform: uppercase;
     letter-spacing: 0.8px;
-
-    color: #91a3bc;
 }
 
 .incident-summary-value {
+    color: #ffffff;
+
     font-size: 20px;
     font-weight: 700;
-
-    color: #ffffff;
 }
 
 
@@ -590,27 +482,26 @@ tbody tr:hover {
 ======================================== */
 
 .workflow-form {
+    margin-top: 18px;
+
     display: flex;
+    align-items: center;
 
     gap: 12px;
-
-    align-items: center;
-    flex-wrap: wrap;
-
-    margin-top: 20px;
 }
 
 .workflow-form select {
-    min-height: 44px;
+    min-height: 46px;
 
-    padding: 0 13px;
+    padding: 0 14px;
 
     background: #111a2a;
-
     color: #f8fafc;
 
     border: 1px solid #45546a;
-    border-radius: 6px;
+    border-radius: 7px;
+
+    font-size: 15px;
 }
 
 
@@ -646,12 +537,97 @@ tbody tr:hover {
 .attack-arrow {
     color: #657790;
 
-    font-size: 18px;
+    font-size: 19px;
 }
 
 
 /* ========================================
-   EVENT / EVIDENCE CARDS
+   MITRE ATT&CK
+======================================== */
+
+.mitre-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin-top: 20px;
+}
+
+.mitre-card {
+    padding: 18px;
+
+    background: #111a2a;
+
+    border: 1px solid #344255;
+    border-radius: 8px;
+}
+
+.mitre-card-top {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 12px;
+}
+
+.mitre-id {
+    padding: 5px 9px;
+
+    background:
+        rgba(255, 77, 90, 0.12);
+
+    border: 1px solid
+        rgba(255, 77, 90, 0.35);
+
+    border-radius: 5px;
+
+    color: #ff6975;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.mitre-unmapped {
+    background:
+        rgba(150, 160, 175, 0.12);
+
+    border-color:
+        rgba(150, 160, 175, 0.35);
+
+    color: #aab3c2;
+}
+
+.mitre-tactic {
+    color: #8fa5c3;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.mitre-technique-name {
+    margin-bottom: 8px;
+
+    color: #f8fafc;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mitre-event-type {
+    color: #91a3bc;
+
+    font-size: 13px;
+}
+
+
+/* ========================================
+   EVENT EVIDENCE
 ======================================== */
 
 .evidence-list {
@@ -681,14 +657,12 @@ tbody tr:hover {
     gap: 15px;
 
     margin-bottom: 10px;
-
-    flex-wrap: wrap;
 }
 
 .evidence-source {
-    font-weight: 700;
-
     color: #63adff;
+
+    font-weight: 700;
 }
 
 .evidence-time {
@@ -705,30 +679,52 @@ tbody tr:hover {
     line-height: 1.6;
 }
 
+.evidence-network {
+    display: flex;
 
-/* ========================================
-   GENERAL FORM ELEMENTS
-======================================== */
+    gap: 20px;
 
-button,
-input,
-select {
-    font-family: inherit;
+    flex-wrap: wrap;
+
+    margin-top: 12px;
+
+    color: #8396b2;
+
+    font-size: 13px;
 }
 
 
 /* ========================================
-   RESPONSIVE DESIGN
+   EMPTY STATE
+======================================== */
+
+.empty-state {
+    padding: 40px;
+
+    text-align: center;
+
+    background: #1d2939;
+
+    border: 1px solid #344255;
+    border-radius: 10px;
+
+    color: #9fb3d1;
+}
+
+
+/* ========================================
+   RESPONSIVE
 ======================================== */
 
 @media (max-width: 1200px) {
 
-    .summary-grid {
+    .summary-grid,
+    .incident-summary-grid {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 
-    .incident-summary-grid {
+    .mitre-grid {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
@@ -738,29 +734,21 @@ select {
 @media (max-width: 700px) {
 
     .container {
-        padding:
-            28px 16px 45px;
+        padding: 28px 16px 45px;
     }
 
     .page-header h1 {
-        font-size: 40px;
+        font-size: 38px;
     }
 
-    .page-header p {
-        font-size: 17px;
-    }
-
-    .summary-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .incident-summary-grid {
+    .summary-grid,
+    .incident-summary-grid,
+    .mitre-grid {
         grid-template-columns: 1fr;
     }
 
     .filter-card {
         flex-direction: column;
-        align-items: stretch;
     }
 
     .filter-card input,
@@ -770,7 +758,8 @@ select {
         width: 100%;
     }
 
-    .section-block h2 {
-        font-size: 25px;
+    .workflow-form {
+        flex-direction: column;
+        align-items: stretch;
     }
 }

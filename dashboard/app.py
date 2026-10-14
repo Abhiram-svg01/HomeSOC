@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 from pathlib import Path
 
 from flask import (
@@ -13,6 +14,16 @@ from flask import (
 
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
+SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(
+        0,
+        str(SCRIPTS_DIR)
+    )
+
+from mitre_mapping import get_incident_mitre
+
 
 app = Flask(
     __name__,
@@ -70,10 +81,6 @@ def dashboard():
 
     params = []
 
-    # ----------------------------
-    # Severity filter
-    # ----------------------------
-
     if severity_filter:
         query += """
             AND severity = ?
@@ -82,10 +89,6 @@ def dashboard():
         params.append(
             severity_filter
         )
-
-    # ----------------------------
-    # Search
-    # ----------------------------
 
     if search_query:
         cleaned_search = (
@@ -133,10 +136,6 @@ def dashboard():
         params
     ).fetchall()
 
-    # ----------------------------
-    # Main dashboard metrics
-    # ----------------------------
-
     total_incidents = connection.execute("""
         SELECT COUNT(*) AS count
         FROM incidents
@@ -149,9 +148,7 @@ def dashboard():
     """).fetchone()["count"]
 
     protected_assets = connection.execute("""
-        SELECT COUNT(
-            DISTINCT asset_ip
-        ) AS count
+        SELECT COUNT(DISTINCT asset_ip) AS count
         FROM incidents
     """).fetchone()["count"]
 
@@ -160,43 +157,35 @@ def dashboard():
         FROM incidents
     """).fetchone()["average"]
 
-    # ----------------------------
-    # Correlation metrics
-    # ----------------------------
-
     total_raw_events = connection.execute("""
-        SELECT
-            COALESCE(
-                SUM(event_count),
-                0
-            ) AS total
+        SELECT COALESCE(
+            SUM(event_count),
+            0
+        ) AS total
         FROM incidents
     """).fetchone()["total"]
 
     total_unique_signals = connection.execute("""
-        SELECT
-            COALESCE(
-                SUM(signal_count),
-                0
-            ) AS total
+        SELECT COALESCE(
+            SUM(signal_count),
+            0
+        ) AS total
         FROM incidents
     """).fetchone()["total"]
 
     total_duplicates_suppressed = connection.execute("""
-        SELECT
-            COALESCE(
-                SUM(suppressed_duplicates),
-                0
-            ) AS total
+        SELECT COALESCE(
+            SUM(suppressed_duplicates),
+            0
+        ) AS total
         FROM incidents
     """).fetchone()["total"]
 
     total_corroboration_bonus = connection.execute("""
-        SELECT
-            COALESCE(
-                SUM(corroboration_bonus),
-                0
-            ) AS total
+        SELECT COALESCE(
+            SUM(corroboration_bonus),
+            0
+        ) AS total
         FROM incidents
     """).fetchone()["total"]
 
@@ -281,11 +270,19 @@ def incident_details(
                 stage
             )
 
+    # Build MITRE ATT&CK mappings
+    mitre_techniques = get_incident_mitre(
+        events
+    )
+
     return render_template(
         "incident.html",
+
         incident=incident,
         events=events,
-        attack_progression=attack_progression
+
+        attack_progression=attack_progression,
+        mitre_techniques=mitre_techniques
     )
 
 
