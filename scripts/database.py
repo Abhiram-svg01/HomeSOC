@@ -8,10 +8,17 @@ DB_PATH = Path("data/homesoc.db")
 
 
 def get_connection():
-    DB_PATH.parent.mkdir(exist_ok=True)
+    DB_PATH.parent.mkdir(
+        exist_ok=True
+    )
 
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
+    connection = sqlite3.connect(
+        DB_PATH
+    )
+
+    connection.row_factory = (
+        sqlite3.Row
+    )
 
     return connection
 
@@ -23,41 +30,68 @@ def init_database():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS incidents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+
             asset_ip TEXT NOT NULL,
+
             start_time TEXT NOT NULL,
             end_time TEXT NOT NULL,
+
             total_score INTEGER NOT NULL,
             severity TEXT NOT NULL,
+
             event_count INTEGER NOT NULL,
-            status TEXT NOT NULL DEFAULT 'NEW',
-            signal_count INTEGER NOT NULL DEFAULT 0,
-            corroboration_bonus INTEGER NOT NULL DEFAULT 0,
-            suppressed_duplicates INTEGER NOT NULL DEFAULT 0,
-            sources TEXT DEFAULT ''
+
+            status TEXT NOT NULL
+                DEFAULT 'NEW',
+
+            signal_count INTEGER NOT NULL
+                DEFAULT 0,
+
+            corroboration_bonus INTEGER NOT NULL
+                DEFAULT 0,
+
+            suppressed_duplicates INTEGER NOT NULL
+                DEFAULT 0,
+
+            sources TEXT DEFAULT '',
+
+            confidence_score INTEGER NOT NULL
+                DEFAULT 0,
+
+            confidence_level TEXT NOT NULL
+                DEFAULT 'UNKNOWN'
         )
     """)
+
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+
             incident_id INTEGER NOT NULL,
+
             timestamp TEXT NOT NULL,
             source TEXT NOT NULL,
             event_type TEXT NOT NULL,
             severity TEXT NOT NULL,
+
             risk_score INTEGER NOT NULL,
+
             src_ip TEXT,
             dst_ip TEXT,
             asset_ip TEXT,
+
             description TEXT,
+
             FOREIGN KEY (incident_id)
                 REFERENCES incidents(id)
         )
     """)
 
-    # ----------------------------
-    # Database migration support
-    # ----------------------------
+
+    # =====================================
+    # DATABASE MIGRATION SUPPORT
+    # =====================================
 
     cursor.execute(
         "PRAGMA table_info(incidents)"
@@ -68,85 +102,156 @@ def init_database():
         for row in cursor.fetchall()
     }
 
+
     if "status" not in columns:
+
         cursor.execute("""
             ALTER TABLE incidents
+
             ADD COLUMN status TEXT
             NOT NULL DEFAULT 'NEW'
         """)
 
+
     if "signal_count" not in columns:
+
         cursor.execute("""
             ALTER TABLE incidents
+
             ADD COLUMN signal_count INTEGER
             NOT NULL DEFAULT 0
         """)
 
+
     if "corroboration_bonus" not in columns:
+
         cursor.execute("""
             ALTER TABLE incidents
+
             ADD COLUMN corroboration_bonus INTEGER
             NOT NULL DEFAULT 0
         """)
 
+
     if "suppressed_duplicates" not in columns:
+
         cursor.execute("""
             ALTER TABLE incidents
+
             ADD COLUMN suppressed_duplicates INTEGER
             NOT NULL DEFAULT 0
         """)
 
+
     if "sources" not in columns:
+
         cursor.execute("""
             ALTER TABLE incidents
+
             ADD COLUMN sources TEXT
             DEFAULT ''
         """)
+
+
+    if "confidence_score" not in columns:
+
+        cursor.execute("""
+            ALTER TABLE incidents
+
+            ADD COLUMN confidence_score INTEGER
+            NOT NULL DEFAULT 0
+        """)
+
+
+    if "confidence_level" not in columns:
+
+        cursor.execute("""
+            ALTER TABLE incidents
+
+            ADD COLUMN confidence_level TEXT
+            NOT NULL DEFAULT 'UNKNOWN'
+        """)
+
 
     connection.commit()
     connection.close()
 
 
-def get_incident_sources(incident):
+def get_incident_sources(
+    incident
+):
     sources = sorted({
         event["source"]
         for event in incident["events"]
     })
 
-    return ", ".join(sources)
+    return ", ".join(
+        sources
+    )
 
 
-def save_incident(incident):
+def save_incident(
+    incident
+):
     connection = get_connection()
     cursor = connection.cursor()
 
-    severity = calculate_incident_severity(
-        incident["total_score"]
+
+    severity = (
+        calculate_incident_severity(
+            incident["total_score"]
+        )
     )
+
 
     signal_count = incident.get(
         "signal_count",
         len(incident["events"])
     )
 
-    corroboration_bonus = incident.get(
-        "corroboration_bonus",
+
+    corroboration_bonus = (
+        incident.get(
+            "corroboration_bonus",
+            0
+        )
+    )
+
+
+    suppressed_duplicates = (
+        incident.get(
+            "suppressed_duplicates",
+            0
+        )
+    )
+
+
+    confidence_score = incident.get(
+        "confidence_score",
         0
     )
 
-    suppressed_duplicates = incident.get(
-        "suppressed_duplicates",
-        0
+
+    confidence_level = incident.get(
+        "confidence_level",
+        "UNKNOWN"
     )
+
 
     sources = get_incident_sources(
         incident
     )
 
-    # Check whether this incident already exists.
+
+    # =====================================
+    # CHECK FOR EXISTING INCIDENT
+    # =====================================
+
     existing = cursor.execute("""
         SELECT id
+
         FROM incidents
+
         WHERE asset_ip = ?
           AND start_time = ?
           AND end_time = ?
@@ -154,108 +259,192 @@ def save_incident(incident):
           AND event_count = ?
     """, (
         incident["asset_ip"],
+
         incident["start_time"],
         incident["end_time"],
+
         incident["total_score"],
-        len(incident["events"])
+
+        len(
+            incident["events"]
+        )
     )).fetchone()
 
-    if existing:
-        incident_id = existing["id"]
 
-        # Update correlation metrics in case this is
-        # an older database row created before these
-        # fields existed.
+    if existing:
+
+        incident_id = existing[
+            "id"
+        ]
+
+
         cursor.execute("""
             UPDATE incidents
+
             SET
                 severity = ?,
+
                 signal_count = ?,
+
                 corroboration_bonus = ?,
+
                 suppressed_duplicates = ?,
-                sources = ?
+
+                sources = ?,
+
+                confidence_score = ?,
+
+                confidence_level = ?
+
             WHERE id = ?
         """, (
             severity,
+
             signal_count,
+
             corroboration_bonus,
+
             suppressed_duplicates,
+
             sources,
+
+            confidence_score,
+
+            confidence_level,
+
             incident_id
         ))
+
 
         connection.commit()
         connection.close()
 
         return incident_id
 
-    # ----------------------------
-    # Insert new incident
-    # ----------------------------
+
+    # =====================================
+    # INSERT INCIDENT
+    # =====================================
 
     cursor.execute("""
         INSERT INTO incidents (
             asset_ip,
+
             start_time,
             end_time,
+
             total_score,
             severity,
+
             event_count,
+
             status,
+
             signal_count,
+
             corroboration_bonus,
+
             suppressed_duplicates,
-            sources
+
+            sources,
+
+            confidence_score,
+
+            confidence_level
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+        VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )
     """, (
         incident["asset_ip"],
+
         incident["start_time"],
         incident["end_time"],
+
         incident["total_score"],
+
         severity,
-        len(incident["events"]),
+
+        len(
+            incident["events"]
+        ),
+
         "NEW",
+
         signal_count,
+
         corroboration_bonus,
+
         suppressed_duplicates,
-        sources
+
+        sources,
+
+        confidence_score,
+
+        confidence_level
     ))
+
 
     incident_id = cursor.lastrowid
 
-    # ----------------------------
-    # Store evidence events
-    # ----------------------------
 
-    for event in incident["events"]:
+    # =====================================
+    # STORE EVENT EVIDENCE
+    # =====================================
+
+    for event in incident[
+        "events"
+    ]:
 
         cursor.execute("""
             INSERT INTO events (
                 incident_id,
+
                 timestamp,
+
                 source,
+
                 event_type,
+
                 severity,
+
                 risk_score,
+
                 src_ip,
+
                 dst_ip,
+
                 asset_ip,
+
                 description
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+            VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
         """, (
             incident_id,
+
             event["timestamp"],
+
             event["source"],
+
             event["event_type"],
+
             event["severity"],
+
             event["risk_score"],
+
             event["src_ip"],
+
             event["dst_ip"],
+
             event["asset_ip"],
+
             event["description"]
         ))
+
 
     connection.commit()
     connection.close()

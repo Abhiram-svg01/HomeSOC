@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from confidence_engine import build_confidence_summary
+
 
 ATTACK_STAGES = {
     "Network Scan": "Reconnaissance",
@@ -13,13 +15,10 @@ ATTACK_STAGES = {
 }
 
 
-# Events of the same type occurring within this period
-# are treated as possible observations of the same activity.
 DEDUP_WINDOW_SECONDS = 90
 
-# Different tools confirming the same activity increase confidence,
-# but should not add the entire event score again.
 CORROBORATION_PERCENT = 0.25
+
 CORROBORATION_CAP = 15
 
 
@@ -72,10 +71,6 @@ def score_event(
     event,
     event_time
 ):
-    """
-    Add risk without blindly double-counting duplicate alerts.
-    """
-
     signal = find_matching_signal(
         incident,
         event,
@@ -90,9 +85,18 @@ def score_event(
 
         incident["_signal_groups"].append(
             {
-                "event_type": event["event_type"],
-                "base_score": event["risk_score"],
-                "last_time": event["timestamp"],
+                "event_type": event[
+                    "event_type"
+                ],
+
+                "base_score": event[
+                    "risk_score"
+                ],
+
+                "last_time": event[
+                    "timestamp"
+                ],
+
                 "sources": {
                     event["source"]
                 }
@@ -101,12 +105,18 @@ def score_event(
 
         return
 
-    # Same activity reported again.
-    signal["last_time"] = event["timestamp"]
 
-    # Same tool reporting the same activity again:
-    # keep the evidence, but don't increase risk.
-    if event["source"] in signal["sources"]:
+    signal["last_time"] = event[
+        "timestamp"
+    ]
+
+
+    # Same tool reporting the same
+    # activity again.
+    if (
+        event["source"]
+        in signal["sources"]
+    ):
 
         incident[
             "suppressed_duplicates"
@@ -114,7 +124,9 @@ def score_event(
 
         return
 
-    # A different security tool corroborated the event.
+
+    # Different security tool confirming
+    # the same activity.
     bonus = round(
         signal["base_score"]
         * CORROBORATION_PERCENT
@@ -125,8 +137,13 @@ def score_event(
         CORROBORATION_CAP
     )
 
-    incident["total_score"] += bonus
-    incident["corroboration_bonus"] += bonus
+    incident[
+        "total_score"
+    ] += bonus
+
+    incident[
+        "corroboration_bonus"
+    ] += bonus
 
     signal["sources"].add(
         event["source"]
@@ -150,15 +167,19 @@ def correlate_events(
 
     incidents = []
 
+
     for event in events:
 
         event_time = parse_timestamp(
             event["timestamp"]
         )
 
-        asset = event["asset_ip"]
+        asset = event[
+            "asset_ip"
+        ]
 
         matching_incident = None
+
 
         for incident in reversed(
             incidents
@@ -186,21 +207,30 @@ def correlate_events(
 
             break
 
+
         if matching_incident is None:
 
             matching_incident = {
                 "asset_ip": asset,
+
                 "events": [],
+
                 "total_score": 0,
+
                 "stages": [],
+
                 "start_time": event[
                     "timestamp"
                 ],
+
                 "end_time": event[
                     "timestamp"
                 ],
+
                 "corroboration_bonus": 0,
+
                 "suppressed_duplicates": 0,
+
                 "_signal_groups": []
             }
 
@@ -208,19 +238,23 @@ def correlate_events(
                 matching_incident
             )
 
+
         matching_incident[
             "events"
         ].append(event)
 
+
         matching_incident[
             "end_time"
         ] = event["timestamp"]
+
 
         score_event(
             matching_incident,
             event,
             event_time
         )
+
 
         stage = ATTACK_STAGES.get(
             event["event_type"],
@@ -237,12 +271,19 @@ def correlate_events(
                 "stages"
             ].append(stage)
 
-    # Preserve useful signal counts but remove
-    # internal correlation structures.
+
+    # --------------------------------
+    # Final incident enrichment
+    # --------------------------------
+
     for incident in incidents:
 
-        incident["signal_count"] = len(
-            incident["_signal_groups"]
+        incident[
+            "signal_count"
+        ] = len(
+            incident[
+                "_signal_groups"
+            ]
         )
 
         incident.pop(
@@ -250,11 +291,26 @@ def correlate_events(
             None
         )
 
+
+        # Calculate confidence after
+        # correlation is complete.
+        confidence = (
+            build_confidence_summary(
+                incident
+            )
+        )
+
+        incident.update(
+            confidence
+        )
+
+
     return incidents
 
 
-def calculate_incident_severity(score):
-
+def calculate_incident_severity(
+    score
+):
     if score >= 120:
         return "CRITICAL"
 
@@ -271,14 +327,16 @@ def print_incident(
     incident,
     incident_number=None
 ):
-
     severity = (
         calculate_incident_severity(
             incident["total_score"]
         )
     )
 
-    print("\n" + "=" * 55)
+    print(
+        "\n" + "=" * 55
+    )
+
 
     if incident_number:
 
@@ -293,7 +351,11 @@ def print_incident(
             "HOMESOC INCIDENT"
         )
 
-    print("=" * 55)
+
+    print(
+        "=" * 55
+    )
+
 
     print(
         f"Protected Asset : "
@@ -330,6 +392,18 @@ def print_incident(
         f"{severity}"
     )
 
+
+    print(
+        f"Confidence Score: "
+        f"{incident.get('confidence_score', 0)}/100"
+    )
+
+    print(
+        f"Confidence      : "
+        f"{incident.get('confidence_level', 'UNKNOWN')}"
+    )
+
+
     print(
         f"Cross-tool Bonus: "
         f"{incident.get('corroboration_bonus', 0)}"
@@ -340,7 +414,10 @@ def print_incident(
         f"{incident.get('suppressed_duplicates', 0)}"
     )
 
-    print("\nAttack Progression:")
+
+    print(
+        "\nAttack Progression:"
+    )
 
     print(
         " -> ".join(
@@ -348,9 +425,15 @@ def print_incident(
         )
     )
 
-    print("\nEvidence:")
 
-    for event in incident["events"]:
+    print(
+        "\nEvidence:"
+    )
+
+
+    for event in incident[
+        "events"
+    ]:
 
         print(
             f"{event['timestamp']} | "
@@ -358,6 +441,7 @@ def print_incident(
             f"{event['event_type']} "
             f"({event['risk_score']} points)"
         )
+
 
     if len(
         incident["stages"]
@@ -368,4 +452,7 @@ def print_incident(
             "multi-stage attack detected."
         )
 
-    print("=" * 55)
+
+    print(
+        "=" * 55
+    )
