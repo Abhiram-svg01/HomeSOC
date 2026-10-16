@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,17 +10,151 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>HomeSOC Incident</title>
+    <title>
+        HomeSOC | Incident #{{ "%04d"|format(incident["id"]) }}
+    </title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
+
+    <style>
+
+        /* ==========================================
+           INCIDENT REPORT EXPORT BUTTON
+           ========================================== */
+
+        .incident-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .incident-toolbar .back-link {
+            margin-bottom: 0;
+        }
+
+        .report-download-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 11px;
+
+            padding: 14px 22px;
+
+            background: linear-gradient(
+                135deg,
+                #F1D8A4,
+                #D4AC68
+            );
+
+            color: #241B16;
+
+            border: 1px solid #E9C88D;
+            border-radius: 10px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+
+            box-shadow:
+                0 4px 18px rgba(212, 172, 104, 0.12);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .report-download-button:hover {
+            transform: translateY(-2px);
+
+            background: linear-gradient(
+                135deg,
+                #F7E3BA,
+                #E4BE7D
+            );
+
+            color: #241B16;
+
+            box-shadow:
+                0 8px 24px rgba(212, 172, 104, 0.25);
+        }
+
+        .report-download-button:focus-visible {
+            outline: 3px solid #63D8A5;
+            outline-offset: 4px;
+        }
+
+        .report-download-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 22px;
+            height: 22px;
+
+            font-size: 19px;
+            line-height: 1;
+        }
+
+        .report-download-text {
+            white-space: nowrap;
+        }
+
+        .incident-export-note {
+            margin-top: 10px;
+
+            color: #A9957D;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 650px) {
+
+            .incident-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .report-download-button {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .report-download-button {
+                transition: none;
+            }
+
+            .report-download-button:hover {
+                transform: none;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-    <div class="container">
+<main class="container">
+
+    <!-- ==========================================
+         TOP NAVIGATION AND REPORT EXPORT
+         ========================================== -->
+
+    <div class="incident-toolbar">
 
         <a
             href="{{ url_for('dashboard') }}"
@@ -28,402 +163,490 @@
             ← Back to Dashboard
         </a>
 
+        <a
+            href="{{ url_for(
+                'download_incident_report',
+                incident_id=incident['id']
+            ) }}"
+            class="report-download-button"
+            aria-label="Download PDF report for incident {{ incident['id'] }}"
+        >
 
-        <header class="page-header">
+            <span
+                class="report-download-icon"
+                aria-hidden="true"
+            >
+                ↓
+            </span>
 
-            <h1>
-                Incident #{{ "%04d"|format(incident["id"]) }}
-            </h1>
+            <span class="report-download-text">
+                Download Incident Report
+            </span>
 
-            <p>
-                HomeSOC Incident Investigation
-            </p>
+        </a>
 
-        </header>
-
-
-        <!-- =========================
-             INCIDENT SUMMARY
-        ========================== -->
-
-        <section class="incident-card">
-
-            <h2>
-                Incident Summary
-            </h2>
-
-            <div class="incident-summary-grid">
-
-                <div class="incident-summary-item">
-
-                    <span class="incident-summary-label">
-                        Protected Asset
-                    </span>
-
-                    <span class="incident-summary-value">
-                        {{ incident["asset_ip"] }}
-                    </span>
-
-                </div>
+    </div>
 
 
-                <div class="incident-summary-item">
+    <!-- ==========================================
+         PAGE HEADER
+         ========================================== -->
 
-                    <span class="incident-summary-label">
-                        Severity
-                    </span>
+    <header class="page-header">
 
-                    <span class="incident-summary-value {{ incident['severity'] }}">
-                        {{ incident["severity"] }}
-                    </span>
+        <h1>
+            Incident #{{ "%04d"|format(incident["id"]) }}
+        </h1>
 
-                </div>
+        <p>
+            HomeSOC Incident Investigation
+        </p>
 
+        <div class="incident-export-note">
+            Security analysis · Correlated evidence · Sample telemetry
+        </div>
 
-                <div class="incident-summary-item">
-
-                    <span class="incident-summary-label">
-                        Risk Score
-                    </span>
-
-                    <span class="incident-summary-value">
-                        {{ incident["total_score"] }}
-                    </span>
-
-                </div>
+    </header>
 
 
-                <div class="incident-summary-item">
+    <!-- ==========================================
+         INCIDENT SUMMARY
+         ========================================== -->
 
-                    <span class="incident-summary-label">
-                        Raw Alerts
-                    </span>
+    <section class="incident-card">
 
-                    <span class="incident-summary-value">
-                        {{ incident["event_count"] }}
-                    </span>
+        <h2>
+            Incident Summary
+        </h2>
 
-                </div>
+        <div class="incident-summary-grid">
 
+            <!-- PROTECTED ASSET -->
 
-                <div class="incident-summary-item">
+            <div class="incident-summary-item">
 
-                    <span class="incident-summary-label">
-                        Unique Signals
-                    </span>
+                <span class="incident-summary-label">
+                    Protected Asset
+                </span>
 
-                    <span class="incident-summary-value">
-
-                        {% if incident["signal_count"] %}
-
-                            {{ incident["signal_count"] }}
-
-                        {% else %}
-
-                            {{ incident["event_count"] }}
-
-                        {% endif %}
-
-                    </span>
-
-                </div>
-
-
-                <div class="incident-summary-item">
-
-                    <span class="incident-summary-label">
-                        Corroboration Bonus
-                    </span>
-
-                    <span class="incident-summary-value">
-                        +{{ incident["corroboration_bonus"] }}
-                    </span>
-
-                </div>
-
-
-                <div class="incident-summary-item">
-
-                    <span class="incident-summary-label">
-                        Duplicates Suppressed
-                    </span>
-
-                    <span class="incident-summary-value">
-                        {{ incident["suppressed_duplicates"] }}
-                    </span>
-
-                </div>
-
-
-                <div class="incident-summary-item">
-
-                    <span class="incident-summary-label">
-                        Sources
-                    </span>
-
-                    <span class="incident-summary-value">
-
-                        {% if incident["sources"] %}
-
-                            {{ incident["sources"] }}
-
-                        {% else %}
-
-                            Legacy
-
-                        {% endif %}
-
-                    </span>
-
-                </div>
+                <span class="incident-summary-value">
+                    {{ incident["asset_ip"] }}
+                </span>
 
             </div>
 
-        </section>
+
+            <!-- SEVERITY -->
+
+            <div class="incident-summary-item">
+
+                <span class="incident-summary-label">
+                    Severity
+                </span>
+
+                <span class="
+                    incident-summary-value
+                    {{ incident['severity'] }}
+                ">
+                    {{ incident["severity"] }}
+                </span>
+
+            </div>
 
 
-        <!-- =========================
-             ANALYST WORKFLOW
-        ========================== -->
+            <!-- RISK SCORE -->
 
-        <section class="incident-card">
+            <div class="incident-summary-item">
 
-            <h2>
-                Analyst Workflow
-            </h2>
+                <span class="incident-summary-label">
+                    Risk Score
+                </span>
 
-            <p>
-                Current Status:
-                <strong>
-                    {{ incident["status"] }}
-                </strong>
-            </p>
+                <span class="incident-summary-value">
+                    {{ incident["total_score"] }}
+                </span>
+
+            </div>
 
 
-            <form
-                method="POST"
-                action="{{ url_for(
-                    'update_incident_status',
-                    incident_id=incident['id']
-                ) }}"
-                class="workflow-form"
-            >
+            <!-- RAW ALERTS -->
 
-                <select name="status">
+            <div class="incident-summary-item">
 
-                    <option
-                        value="NEW"
-                        {% if incident["status"] == "NEW" %}
-                            selected
-                        {% endif %}
-                    >
-                        NEW
-                    </option>
+                <span class="incident-summary-label">
+                    Raw Alerts
+                </span>
+
+                <span class="incident-summary-value">
+                    {{ incident["event_count"] }}
+                </span>
+
+            </div>
 
 
-                    <option
-                        value="INVESTIGATING"
-                        {% if incident["status"] == "INVESTIGATING" %}
-                            selected
-                        {% endif %}
-                    >
-                        INVESTIGATING
-                    </option>
+            <!-- UNIQUE SIGNALS -->
 
+            <div class="incident-summary-item">
 
-                    <option
-                        value="RESOLVED"
-                        {% if incident["status"] == "RESOLVED" %}
-                            selected
-                        {% endif %}
-                    >
-                        RESOLVED
-                    </option>
+                <span class="incident-summary-label">
+                    Unique Signals
+                </span>
 
-                </select>
+                <span class="incident-summary-value">
 
+                    {% if incident["signal_count"] %}
 
-                <button
-                    type="submit"
-                    class="primary-button"
-                >
-                    Update Status
-                </button>
+                        {{ incident["signal_count"] }}
 
-            </form>
+                    {% else %}
 
-        </section>
-
-
-        <!-- =========================
-             ATTACK PROGRESSION
-        ========================== -->
-
-        <section class="incident-card">
-
-            <h2>
-                Attack Progression
-            </h2>
-
-            <div class="attack-chain">
-
-                {% for stage in attack_progression %}
-
-                    <span class="attack-stage">
-                        {{ stage }}
-                    </span>
-
-                    {% if not loop.last %}
-
-                        <span class="attack-arrow">
-                            →
-                        </span>
+                        {{ incident["event_count"] }}
 
                     {% endif %}
 
-                {% endfor %}
+                </span>
 
             </div>
 
-        </section>
+
+            <!-- CORROBORATION BONUS -->
+
+            <div class="incident-summary-item">
+
+                <span class="incident-summary-label">
+                    Corroboration Bonus
+                </span>
+
+                <span class="incident-summary-value">
+                    +{{ incident["corroboration_bonus"] }}
+                </span>
+
+            </div>
 
 
-        <!-- =========================
-             MITRE ATT&CK
-        ========================== -->
+            <!-- SUPPRESSED DUPLICATES -->
 
-        <section class="incident-card">
+            <div class="incident-summary-item">
 
-            <h2>
-                MITRE ATT&amp;CK Mapping
-            </h2>
+                <span class="incident-summary-label">
+                    Duplicates Suppressed
+                </span>
 
-            <div class="mitre-grid">
+                <span class="incident-summary-value">
+                    {{ incident["suppressed_duplicates"] }}
+                </span>
 
-                {% for technique in mitre_techniques %}
-
-                    <div class="mitre-card">
-
-                        <div class="mitre-card-top">
-
-                            {% if technique["technique_id"] %}
-
-                                <span class="mitre-id">
-                                    {{ technique["technique_id"] }}
-                                </span>
-
-                            {% else %}
-
-                                <span class="mitre-id mitre-unmapped">
-                                    UNMAPPED
-                                </span>
-
-                            {% endif %}
+            </div>
 
 
-                            <span class="mitre-tactic">
-                                {{ technique["tactic"] }}
+            <!-- SECURITY SOURCES -->
+
+            <div class="incident-summary-item">
+
+                <span class="incident-summary-label">
+                    Sources
+                </span>
+
+                <span class="incident-summary-value">
+
+                    {% if incident["sources"] %}
+
+                        {{ incident["sources"] }}
+
+                    {% else %}
+
+                        Legacy
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         ANALYST WORKFLOW
+         ========================================== -->
+
+    <section class="incident-card">
+
+        <h2>
+            Analyst Workflow
+        </h2>
+
+        <p>
+            Current Status:
+
+            <strong>
+                {{ incident["status"] }}
+            </strong>
+        </p>
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'update_incident_status',
+                incident_id=incident['id']
+            ) }}"
+            class="workflow-form"
+        >
+
+            <select
+                name="status"
+                aria-label="Incident investigation status"
+            >
+
+                <option
+                    value="NEW"
+                    {% if incident["status"] == "NEW" %}
+                        selected
+                    {% endif %}
+                >
+                    NEW
+                </option>
+
+                <option
+                    value="INVESTIGATING"
+                    {% if incident["status"] == "INVESTIGATING" %}
+                        selected
+                    {% endif %}
+                >
+                    INVESTIGATING
+                </option>
+
+                <option
+                    value="RESOLVED"
+                    {% if incident["status"] == "RESOLVED" %}
+                        selected
+                    {% endif %}
+                >
+                    RESOLVED
+                </option>
+
+            </select>
+
+            <button
+                type="submit"
+                class="primary-button"
+            >
+                Update Status
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- ==========================================
+         ATTACK PROGRESSION
+         ========================================== -->
+
+    <section class="incident-card">
+
+        <h2>
+            Attack Progression
+        </h2>
+
+        <div class="attack-chain">
+
+            {% for stage in attack_progression %}
+
+                <span class="attack-stage">
+                    {{ stage }}
+                </span>
+
+                {% if not loop.last %}
+
+                    <span
+                        class="attack-arrow"
+                        aria-hidden="true"
+                    >
+                        →
+                    </span>
+
+                {% endif %}
+
+            {% else %}
+
+                <p class="empty-state">
+                    No attack stages available for this incident.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         MITRE ATT&CK MAPPING
+         ========================================== -->
+
+    <section class="incident-card">
+
+        <h2>
+            MITRE ATT&amp;CK Mapping
+        </h2>
+
+        <div class="mitre-grid">
+
+            {% for technique in mitre_techniques %}
+
+                <div class="mitre-card">
+
+                    <div class="mitre-card-top">
+
+                        {% if technique["technique_id"] %}
+
+                            <span class="mitre-id">
+                                {{ technique["technique_id"] }}
                             </span>
 
-                        </div>
+                        {% else %}
 
+                            <span class="
+                                mitre-id
+                                mitre-unmapped
+                            ">
+                                UNMAPPED
+                            </span>
 
-                        <div class="mitre-technique-name">
+                        {% endif %}
 
-                            {{ technique["technique_name"] }}
-
-                        </div>
-
-
-                        <div class="mitre-event-type">
-
-                            Triggered by:
-                            {{ technique["event_type"] }}
-
-                        </div>
+                        <span class="mitre-tactic">
+                            {{ technique["tactic"] }}
+                        </span>
 
                     </div>
 
-                {% endfor %}
+                    <div class="mitre-technique-name">
+                        {{ technique["technique_name"] }}
+                    </div>
 
-            </div>
+                    <div class="mitre-event-type">
 
-        </section>
-
-
-        <!-- =========================
-             EVENT EVIDENCE
-        ========================== -->
-
-        <section class="incident-card">
-
-            <h2>
-                Event Evidence
-            </h2>
-
-            <div class="evidence-list">
-
-                {% for event in events %}
-
-                    <div class="evidence-card">
-
-                        <div class="evidence-header">
-
-                            <span class="evidence-source">
-                                {{ event["source"] }}
-                            </span>
-
-                            <span class="evidence-time">
-                                {{ event["timestamp"] }}
-                            </span>
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>
-                                {{ event["event_type"] }}
-                            </strong>
-
-                            ·
-
-                            {{ event["risk_score"] }}
-                            points
-
-                        </div>
-
-
-                        <div class="evidence-description">
-
-                            {{ event["description"] }}
-
-                        </div>
-
-
-                        <div class="evidence-network">
-
-                            <span>
-                                Source IP:
-                                {{ event["src_ip"] }}
-                            </span>
-
-                            <span>
-                                Destination IP:
-                                {{ event["dst_ip"] }}
-                            </span>
-
-                        </div>
+                        Triggered by:
+                        {{ technique["event_type"] }}
 
                     </div>
 
-                {% endfor %}
+                </div>
 
-            </div>
+            {% else %}
 
-        </section>
+                <p class="empty-state">
+                    No MITRE ATT&amp;CK mappings available.
+                </p>
 
-    </div>
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         EVENT EVIDENCE
+         ========================================== -->
+
+    <section class="incident-card">
+
+        <h2>
+            Event Evidence
+        </h2>
+
+        <div class="evidence-list">
+
+            {% for event in events %}
+
+                <div class="evidence-card">
+
+                    <!-- SOURCE AND TIMESTAMP -->
+
+                    <div class="evidence-header">
+
+                        <span class="evidence-source">
+                            {{ event["source"] }}
+                        </span>
+
+                        <span class="evidence-time">
+                            {{ event["timestamp"] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- EVENT TYPE AND RISK -->
+
+                    <div>
+
+                        <strong>
+                            {{ event["event_type"] }}
+                        </strong>
+
+                        ·
+
+                        {{ event["risk_score"] }}
+                        points
+
+                    </div>
+
+
+                    <!-- EVIDENCE DESCRIPTION -->
+
+                    <div class="evidence-description">
+
+                        {{ event["description"] }}
+
+                    </div>
+
+
+                    <!-- NETWORK CONTEXT -->
+
+                    <div class="evidence-network">
+
+                        <span>
+                            Source IP:
+                            {{ event["src_ip"] }}
+                        </span>
+
+                        <span>
+                            Destination IP:
+                            {{ event["dst_ip"] }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <p class="empty-state">
+                    No event evidence is stored for this incident.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ==========================================
+     INTERACTIVE BACKGROUND
+     ========================================== -->
+
+<script
+    src="{{ url_for('static', filename='ambient.js') }}"
+    defer
+></script>
 
 </body>
 

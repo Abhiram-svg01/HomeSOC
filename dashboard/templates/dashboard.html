@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,19 +10,264 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>HomeSOC Dashboard</title>
+    <title>HomeSOC | Security Operations Dashboard</title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
+
+    <style>
+
+        /* =============================================
+           SYSTEM HEALTH — PREMIUM PANEL
+           ============================================= */
+
+        .health-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .health-heading h2 {
+            margin: 0;
+        }
+
+        .health-mode {
+            padding: 7px 13px;
+            border: 1px solid rgba(230, 199, 141, 0.35);
+            border-radius: 30px;
+
+            background: rgba(230, 199, 141, 0.09);
+            color: #E6C78D;
+
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .health-card {
+            min-height: 190px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(75, 57, 44, 0.97),
+                    rgba(48, 37, 29, 0.97)
+                );
+
+            border-color: rgba(230, 199, 141, 0.27);
+        }
+
+        .health-card .summary-value {
+            font-size: 25px;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+        }
+
+        .health-card .summary-label {
+            color: #D7C19B;
+        }
+
+        .health-detail {
+            margin-top: 12px;
+
+            color: #BBAA96;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .health-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+
+            width: fit-content;
+
+            padding: 10px 14px;
+
+            border-radius: 9px;
+
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .health-status::before {
+            content: "";
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: currentColor;
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        .health-success {
+            color: #66DFA9;
+
+            background: rgba(102, 223, 169, 0.10);
+
+            border:
+                1px solid rgba(102, 223, 169, 0.30);
+        }
+
+        .health-success::before {
+            animation: healthPulse 2.5s ease-in-out infinite;
+        }
+
+        .health-failed {
+            color: #FF615D;
+
+            background: rgba(225, 6, 0, 0.10);
+
+            border:
+                1px solid rgba(225, 6, 0, 0.35);
+        }
+
+        .health-running {
+            color: #E6C78D;
+
+            background: rgba(230, 199, 141, 0.10);
+
+            border:
+                1px solid rgba(230, 199, 141, 0.30);
+        }
+
+        .health-not-started {
+            color: #BBAA96;
+
+            background: rgba(187, 170, 150, 0.10);
+
+            border:
+                1px solid rgba(187, 170, 150, 0.25);
+        }
+
+        .health-freshness {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .freshness-recent {
+            color: #66DFA9;
+        }
+
+        .freshness-stale {
+            color: #F2B85B;
+        }
+
+        .freshness-unknown {
+            color: #BBAA96;
+        }
+
+        .health-sources {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+
+            margin-top: 12px;
+        }
+
+        .health-source {
+            padding: 5px 8px;
+
+            background: rgba(230, 199, 141, 0.08);
+
+            border:
+                1px solid rgba(230, 199, 141, 0.18);
+
+            border-radius: 6px;
+
+            color: #D9C6A8;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .health-footnote {
+            margin-top: 15px;
+
+            color: #A9957D;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .health-error {
+            margin-top: 14px;
+            padding: 14px 17px;
+
+            color: #FFAAA6;
+
+            background: rgba(225, 6, 0, 0.08);
+
+            border:
+                1px solid rgba(225, 6, 0, 0.25);
+
+            border-radius: 9px;
+
+            overflow-wrap: anywhere;
+        }
+
+        /* Keep the critical incident metric Formula Red */
+
+        .summary-value.critical-number {
+            color: #E10600;
+
+            text-shadow:
+                0 0 12px rgba(225, 6, 0, 0.28);
+        }
+
+        /* Subtle health indicator animation */
+
+        @keyframes healthPulse {
+
+            0%, 100% {
+                opacity: 0.65;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .health-card {
+                min-height: 150px;
+            }
+
+            .health-card .summary-value {
+                font-size: 22px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .health-success::before {
+                animation: none;
+            }
+        }
+
+    </style>
 </head>
 
 <body>
 
-<div class="container">
+<main class="container">
 
-    <!-- HEADER -->
+    <!-- =========================================
+         HEADER
+         ========================================= -->
 
     <header class="page-header">
 
@@ -34,122 +280,61 @@
     </header>
 
 
-    <!-- MAIN METRICS -->
-
-    <section class="summary-grid">
-
-        <div class="summary-card">
-
-            <span class="summary-label">
-                Total Incidents
-            </span>
-
-            <span class="summary-value">
-                {{ total_incidents }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-card">
-
-            <span class="summary-label">
-                Critical Incidents
-            </span>
-
-            <span class="summary-value critical-number">
-                {{ critical_incidents }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-card">
-
-            <span class="summary-label">
-                Protected Assets
-            </span>
-
-            <span class="summary-value">
-                {{ protected_assets }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-card">
-
-            <span class="summary-label">
-                Average Risk Score
-            </span>
-
-            <span class="summary-value">
-                {{ average_risk }}
-            </span>
-
-        </div>
-
-    </section>
-
-
-    <!-- CORRELATION INTELLIGENCE -->
+    <!-- =========================================
+         SECURITY OVERVIEW
+         ========================================= -->
 
     <section class="section-block">
 
-        <h2>
-            Correlation Intelligence
-        </h2>
+        <h2>Security Overview</h2>
 
         <div class="summary-grid">
 
             <div class="summary-card">
 
-                <span class="summary-label">
-                    Raw Alerts
-                </span>
+                <div class="summary-label">
+                    Total Incidents
+                </div>
 
-                <span class="summary-value">
-                    {{ total_raw_events }}
-                </span>
-
-            </div>
-
-
-            <div class="summary-card">
-
-                <span class="summary-label">
-                    Unique Signals
-                </span>
-
-                <span class="summary-value">
-                    {{ total_unique_signals }}
-                </span>
+                <div class="summary-value">
+                    {{ total_incidents }}
+                </div>
 
             </div>
 
-
             <div class="summary-card">
 
-                <span class="summary-label">
-                    Duplicates Suppressed
-                </span>
+                <div class="summary-label">
+                    Critical Incidents
+                </div>
 
-                <span class="summary-value">
-                    {{ total_duplicates_suppressed }}
-                </span>
+                <div class="summary-value critical-number">
+                    {{ critical_incidents }}
+                </div>
 
             </div>
 
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Assets Observed
+                </div>
+
+                <div class="summary-value">
+                    {{ protected_assets }}
+                </div>
+
+            </div>
 
             <div class="summary-card">
 
-                <span class="summary-label">
-                    Corroboration Bonus
-                </span>
+                <div class="summary-label">
+                    Average Risk Score
+                </div>
 
-                <span class="summary-value">
-                    +{{ total_corroboration_bonus }}
-                </span>
+                <div class="summary-value">
+                    {{ average_risk }}
+                </div>
 
             </div>
 
@@ -158,13 +343,280 @@
     </section>
 
 
-    <!-- SEARCH -->
+    <!-- =========================================
+         SYSTEM HEALTH
+         ========================================= -->
 
     <section class="section-block">
 
-        <h2>
-            Incident Search
-        </h2>
+        <div class="health-heading">
+
+            <h2>System Health</h2>
+
+            <span class="health-mode">
+                SAMPLE TELEMETRY
+            </span>
+
+        </div>
+
+        <div class="summary-grid" id="health-metrics">
+
+            <!-- LAST INGESTION -->
+
+            <div class="summary-card health-card">
+
+                <div class="summary-label">
+                    Last Ingestion
+                </div>
+
+                <div class="summary-value">
+                    {{ ingestion_health.last_run_at }}
+                </div>
+
+                <div class="health-detail">
+                    {% if ingestion_health.run_id %}
+                        Ingestion Run #{{ ingestion_health.run_id }}
+                    {% else %}
+                        No ingestion history available
+                    {% endif %}
+                </div>
+
+            </div>
+
+
+            <!-- INGESTION STATUS -->
+
+            <div class="summary-card health-card">
+
+                <div class="summary-label">
+                    Ingestion Status
+                </div>
+
+                {% set health_status = ingestion_health.status %}
+
+                <div>
+
+                    <span class="
+                        health-status
+                        {% if health_status == 'SUCCESS' %}
+                            health-success
+                        {% elif health_status == 'FAILED' %}
+                            health-failed
+                        {% elif health_status == 'RUNNING' %}
+                            health-running
+                        {% else %}
+                            health-not-started
+                        {% endif %}
+                    ">
+
+                        {{ ingestion_health.status_label }}
+
+                    </span>
+
+                </div>
+
+                <div class="health-detail">
+
+                    {% if health_status == 'SUCCESS' %}
+
+                        Latest ingestion completed successfully.
+
+                    {% elif health_status == 'FAILED' %}
+
+                        Latest ingestion encountered an error.
+
+                    {% elif health_status == 'RUNNING' %}
+
+                        Ingestion is currently recorded as running.
+
+                    {% else %}
+
+                        Run the ingestion script to begin monitoring.
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- EVENTS PROCESSED -->
+
+            <div class="summary-card health-card">
+
+                <div class="summary-label">
+                    Events Processed — Latest Run
+                </div>
+
+                <div class="summary-value">
+                    {{ ingestion_health.events_processed }}
+                </div>
+
+                <div class="health-sources">
+
+                    <span class="health-source">
+                        Suricata:
+                        {{ ingestion_health.suricata_events }}
+                    </span>
+
+                    <span class="health-source">
+                        Zeek:
+                        {{ ingestion_health.zeek_events }}
+                    </span>
+
+                    <span class="health-source">
+                        Wazuh:
+                        {{ ingestion_health.wazuh_events }}
+                    </span>
+
+                </div>
+
+                <div class="health-detail">
+
+                    {{ ingestion_health.incidents_correlated }}
+                    correlated incident(s) in this run
+
+                </div>
+
+            </div>
+
+
+            <!-- DATA FRESHNESS -->
+
+            <div class="summary-card health-card">
+
+                <div class="summary-label">
+                    Ingestion Freshness
+                </div>
+
+                <div class="
+                    health-freshness
+
+                    {% if ingestion_health.freshness == 'RECENT' %}
+                        freshness-recent
+                    {% elif ingestion_health.freshness == 'STALE' %}
+                        freshness-stale
+                    {% else %}
+                        freshness-unknown
+                    {% endif %}
+                ">
+
+                    {{ ingestion_health.freshness }}
+
+                </div>
+
+                <div class="health-detail">
+
+                    Last successful run:
+                    {{ ingestion_health.last_success_age }}
+
+                </div>
+
+                <div class="health-detail">
+
+                    {{ ingestion_health.last_success_at }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <p class="health-footnote">
+
+            System Health reflects ingestion script activity,
+            not live sensor connectivity.
+            Freshness is based on the last successful run:
+            recent within 60 minutes, stale afterward.
+
+        </p>
+
+        {% if ingestion_health.status == 'FAILED'
+              and ingestion_health.error_message %}
+
+            <div class="health-error">
+
+                <strong>Latest ingestion error:</strong>
+
+                {{ ingestion_health.error_message }}
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =========================================
+         CORRELATION INTELLIGENCE
+         ========================================= -->
+
+    <section class="section-block">
+
+        <h2>Correlation Intelligence</h2>
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Raw Security Alerts
+                </div>
+
+                <div class="summary-value">
+                    {{ total_raw_events }}
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Unique Signals
+                </div>
+
+                <div class="summary-value">
+                    {{ total_unique_signals }}
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Suppressed Duplicates
+                </div>
+
+                <div class="summary-value">
+                    {{ total_duplicates_suppressed }}
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Corroboration Bonus
+                </div>
+
+                <div class="summary-value">
+                    +{{ total_corroboration_bonus }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         SEARCH AND FILTER
+         ========================================= -->
+
+    <section class="section-block">
+
+        <h2>Incident Investigation</h2>
 
         <form
             method="GET"
@@ -175,56 +627,50 @@
             <input
                 type="text"
                 name="search"
-                placeholder="Search incident ID, asset IP, or source"
+                placeholder="Search incident ID, asset IP, source..."
                 value="{{ search_query }}"
+                aria-label="Search incidents"
             >
 
+            <select
+                name="severity"
+                aria-label="Filter by severity"
+            >
 
-            <select name="severity">
-
-                <option
-                    value=""
-                    {% if not severity_filter %}
-                        selected
-                    {% endif %}
-                >
+                <option value="">
                     All Severities
                 </option>
 
-
                 <option
                     value="CRITICAL"
-                    {% if severity_filter == "CRITICAL" %}
+                    {% if severity_filter == 'CRITICAL' %}
                         selected
                     {% endif %}
                 >
                     Critical
                 </option>
 
-
                 <option
                     value="HIGH"
-                    {% if severity_filter == "HIGH" %}
+                    {% if severity_filter == 'HIGH' %}
                         selected
                     {% endif %}
                 >
                     High
                 </option>
 
-
                 <option
                     value="MEDIUM"
-                    {% if severity_filter == "MEDIUM" %}
+                    {% if severity_filter == 'MEDIUM' %}
                         selected
                     {% endif %}
                 >
                     Medium
                 </option>
 
-
                 <option
                     value="LOW"
-                    {% if severity_filter == "LOW" %}
+                    {% if severity_filter == 'LOW' %}
                         selected
                     {% endif %}
                 >
@@ -233,20 +679,18 @@
 
             </select>
 
-
             <button
                 type="submit"
                 class="primary-button"
             >
-                Apply Filters
+                Search Incidents
             </button>
-
 
             <a
                 href="{{ url_for('dashboard') }}"
                 class="secondary-button"
             >
-                Clear
+                Clear Filters
             </a>
 
         </form>
@@ -254,16 +698,13 @@
     </section>
 
 
-    <!-- INCIDENTS -->
+    <!-- =========================================
+         INCIDENT TABLE
+         ========================================= -->
 
     <section class="section-block">
 
-        <h2>
-            Detected Incidents
-        </h2>
-
-
-        {% if incidents %}
+        <h2>Security Incidents</h2>
 
         <div class="table-wrapper">
 
@@ -273,235 +714,223 @@
 
                     <tr>
 
-                        <th>ID</th>
-
-                        <th>
-                            Protected Asset
-                        </th>
-
-                        <th>
-                            Sources
-                        </th>
-
-                        <th>
-                            Start Time
-                        </th>
-
-                        <th>
-                            Raw Alerts
-                        </th>
-
-                        <th>
-                            Signals
-                        </th>
-
-                        <th>
-                            Risk Score
-                        </th>
-
-                        <th>
-                            Confidence
-                        </th>
-
-                        <th>
-                            Severity
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th>
-                            Investigation
-                        </th>
+                        <th>Incident ID</th>
+                        <th>Asset IP</th>
+                        <th>Sources</th>
+                        <th>Start Time</th>
+                        <th>Raw Alerts</th>
+                        <th>Signals</th>
+                        <th>Risk Score</th>
+                        <th>Confidence</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Investigation</th>
 
                     </tr>
 
                 </thead>
 
-
                 <tbody>
 
-                {% for incident in incidents %}
+                    {% for incident in incidents %}
 
-                    <tr>
+                        <tr>
 
-                        <!-- ID -->
+                            <!-- ID -->
 
-                        <td>
-                            #{{ "%04d"|format(incident["id"]) }}
-                        </td>
-
-
-                        <!-- ASSET -->
-
-                        <td>
-                            {{ incident["asset_ip"] }}
-                        </td>
+                            <td>
+                                #{{ "%04d"|format(incident["id"]) }}
+                            </td>
 
 
-                        <!-- SOURCES -->
+                            <!-- ASSET -->
 
-                        <td class="source-cell">
+                            <td>
+                                {{ incident["asset_ip"] }}
+                            </td>
 
-                            {% if incident["sources"] %}
 
-                                {% for source in incident["sources"].split(", ") %}
+                            <!-- SOURCES -->
 
-                                    <span
-                                        class="source-badge source-{{ source|lower }}"
-                                    >
-                                        {{ source }}
+                            <td class="source-cell">
+
+                                {% set sources = (
+                                    incident["sources"] or ""
+                                )|lower %}
+
+                                {% if "suricata" in sources %}
+
+                                    <span class="source-badge source-suricata">
+                                        Suricata
                                     </span>
 
-                                {% endfor %}
+                                {% endif %}
 
-                            {% else %}
+                                {% if "zeek" in sources %}
 
-                                <span
-                                    class="source-badge source-legacy"
-                                >
-                                    Legacy
-                                </span>
+                                    <span class="source-badge source-zeek">
+                                        Zeek
+                                    </span>
 
-                            {% endif %}
+                                {% endif %}
 
-                        </td>
+                                {% if "wazuh" in sources %}
+
+                                    <span class="source-badge source-wazuh">
+                                        Wazuh
+                                    </span>
+
+                                {% endif %}
+
+                                {% if not (
+                                    "suricata" in sources
+                                    or "zeek" in sources
+                                    or "wazuh" in sources
+                                ) %}
+
+                                    <span class="source-badge source-legacy">
+                                        {{ incident["sources"] or "Legacy" }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
 
 
-                        <!-- START TIME -->
+                            <!-- START TIME -->
 
-                        <td>
-                            {{ incident["start_time"] }}
-                        </td>
-
-
-                        <!-- RAW ALERTS -->
-
-                        <td>
-                            {{ incident["event_count"] }}
-                        </td>
+                            <td>
+                                {{ incident["start_time"] }}
+                            </td>
 
 
-                        <!-- UNIQUE SIGNALS -->
+                            <!-- RAW ALERTS -->
 
-                        <td>
-
-                            {% if incident["signal_count"] %}
-
-                                {{ incident["signal_count"] }}
-
-                            {% else %}
-
+                            <td>
                                 {{ incident["event_count"] }}
-
-                            {% endif %}
-
-                        </td>
+                            </td>
 
 
-                        <!-- RISK -->
+                            <!-- UNIQUE SIGNALS -->
 
-                        <td>
-                            {{ incident["total_score"] }}
-                        </td>
+                            <td>
+                                {{ incident["signal_count"] or 0 }}
+                            </td>
 
 
-                        <!-- CONFIDENCE -->
+                            <!-- RISK SCORE -->
 
-                        <td>
+                            <td>
+                                <strong>
+                                    {{ incident["total_score"] }}
+                                </strong>
+                            </td>
 
-                            <div class="confidence-display">
 
-                                <span class="confidence-score">
+                            <!-- CONFIDENCE -->
 
-                                    {% if incident["confidence_level"] != "UNKNOWN" %}
+                            <td>
 
-                                        {{ incident["confidence_score"] }}/100
+                                {% set confidence_level = (
+                                    incident["confidence_level"]
+                                    or "UNKNOWN"
+                                ) %}
 
-                                    {% else %}
+                                <div class="confidence-display">
 
-                                        —
+                                    <span class="confidence-score">
+                                        {{ incident["confidence_score"] or 0 }}/100
+                                    </span>
 
-                                    {% endif %}
+                                    <span class="
+                                        confidence-badge
+                                        confidence-{{ confidence_level|lower|replace(' ', '-') }}
+                                    ">
+
+                                        {{ confidence_level }}
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- SEVERITY -->
+
+                            <td>
+
+                                <span class="
+                                    severity-badge
+                                    {{ incident["severity"] }}
+                                ">
+
+                                    {{ incident["severity"] }}
 
                                 </span>
 
+                            </td>
 
-                                <span
-                                    class="confidence-badge confidence-{{ incident['confidence_level']|lower|replace(' ', '-') }}"
+
+                            <!-- STATUS -->
+
+                            <td>
+
+                                {% set incident_status = (
+                                    incident["status"] or "NEW"
+                                ) %}
+
+                                <span class="
+                                    status-{{ incident_status|lower }}
+                                ">
+
+                                    {{ incident_status }}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- INVESTIGATE -->
+
+                            <td>
+
+                                <a
+                                    class="incident-link"
+                                    href="{{ url_for(
+                                        'incident_details',
+                                        incident_id=incident['id']
+                                    ) }}"
                                 >
 
-                                    {{ incident["confidence_level"] }}
+                                    View Incident →
 
-                                </span>
+                                </a>
 
-                            </div>
+                            </td>
 
-                        </td>
+                        </tr>
 
+                    {% else %}
 
-                        <!-- SEVERITY -->
+                        <tr>
 
-                        <td>
-
-                            <span
-                                class="severity-badge {{ incident['severity'] }}"
+                            <td
+                                colspan="11"
+                                style="
+                                    padding: 35px;
+                                    text-align: center;
+                                    color: #BBAA96;
+                                "
                             >
-                                {{ incident["severity"] }}
-                            </span>
 
-                        </td>
+                                No incidents match the selected filters.
 
+                            </td>
 
-                        <!-- STATUS -->
+                        </tr>
 
-                        <td>
-
-                            {% if incident["status"] == "NEW" %}
-
-                                <span class="status-new">
-                                    NEW
-                                </span>
-
-
-                            {% elif incident["status"] == "INVESTIGATING" %}
-
-                                <span class="status-investigating">
-                                    INVESTIGATING
-                                </span>
-
-
-                            {% elif incident["status"] == "RESOLVED" %}
-
-                                <span class="status-resolved">
-                                    RESOLVED
-                                </span>
-
-                            {% endif %}
-
-                        </td>
-
-
-                        <!-- INVESTIGATION -->
-
-                        <td>
-
-                            <a
-                                href="{{ url_for(
-                                    'incident_details',
-                                    incident_id=incident['id']
-                                ) }}"
-                                class="incident-link"
-                            >
-                                View Incident
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
+                    {% endfor %}
 
                 </tbody>
 
@@ -509,21 +938,29 @@
 
         </div>
 
-
-        {% else %}
-
-            <div class="empty-state">
-
-                No incidents matched the current filters.
-
-            </div>
-
-        {% endif %}
-
     </section>
 
-</div>
+</main>
+
+
+<!-- =============================================
+     INTERACTIVE BACKGROUND
+     ============================================= -->
+
+<script
+    src="{{ url_for('static', filename='ambient.js') }}"
+    defer
+></script>
+
+
+<!-- =============================================
+     AUTOMATIC DASHBOARD UPDATES
+     ============================================= -->
+
+<script
+    src="{{ url_for('static', filename='live_updates.js') }}"
+    defer
+></script>
 
 </body>
-
 </html>
