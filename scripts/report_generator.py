@@ -190,6 +190,15 @@ def _footer(canvas, document):
 
     width, _ = letter
 
+    canvas.setFont("Helvetica", 7)
+    canvas.setFillColor(MUTED)
+
+    canvas.drawString(
+        43,
+        54,
+        "SCOPE: Demonstration telemetry only; not live protection or confirmed intrusion."
+    )
+
     canvas.setStrokeColor(PALE)
 
     canvas.line(
@@ -310,7 +319,7 @@ def build_incident_pdf(
         rightMargin=43,
         leftMargin=43,
         topMargin=52,
-        bottomMargin=54,
+        bottomMargin=66,
         title=f"HomeSOC Incident {incident_id:04d} Report",
         author="HomeSOC",
     )
@@ -604,8 +613,9 @@ def build_incident_pdf(
 
     story.append(
         Paragraph(
-            "Confidence is a rule-based correlation score, "
-            "not a statistical probability that an attack occurred.",
+            "Incident severity uses correlated risk; "
+            "event severity is source-assigned. "
+            "Confidence is heuristic, not an attack probability.",
             styles["warning"]
         )
     )
@@ -908,24 +918,6 @@ def build_incident_pdf(
         story.append(
             KeepTogether(event_block)
         )
-
-    # ==============================================
-    # REPORT DISCLAIMER
-    # ==============================================
-
-    story.append(
-        Spacer(1, 12)
-    )
-
-    story.append(
-        Paragraph(
-            "REPORT SCOPE  /  This report summarizes records "
-            "in the HomeSOC demonstration database. "
-            "It does not verify real-time home protection "
-            "or independently confirm an intrusion.",
-            styles["warning"]
-        )
-    )
 
     # ==============================================
     # GENERATE PDF

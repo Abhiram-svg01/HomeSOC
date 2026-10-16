@@ -469,6 +469,14 @@
                         {{ ingestion_health.wazuh_events }}
                     </span>
 
+                    {% if ingestion_health.auth_lab_records > 0 %}
+                        <span class="health-source"
+                              title="Simulated authentication telemetry">
+                            AuthLab (simulated):
+                            {{ ingestion_health.auth_lab_detections }}
+                        </span>
+                    {% endif %}
+
                 </div>
 
                 <div class="health-detail">
@@ -477,6 +485,16 @@
                     correlated incident(s) in this run
 
                 </div>
+
+                {% if ingestion_health.auth_lab_records > 0 %}
+                    <div class="health-detail">
+                        AuthLab evaluated
+                        {{ ingestion_health.auth_lab_records }}
+                        simulated records and forwarded
+                        {{ ingestion_health.auth_lab_detections }}
+                        derived detection(s).
+                    </div>
+                {% endif %}
 
             </div>
 
@@ -782,10 +800,20 @@
 
                                 {% endif %}
 
+                                {% if "homesoc rule engine" in sources %}
+
+                                    <span class="source-badge source-legacy"
+                                          title="Derived from simulated authentication telemetry">
+                                        AuthLab ? Simulated
+                                    </span>
+
+                                {% endif %}
+
                                 {% if not (
                                     "suricata" in sources
                                     or "zeek" in sources
                                     or "wazuh" in sources
+                                    or "homesoc rule engine" in sources
                                 ) %}
 
                                     <span class="source-badge source-legacy">

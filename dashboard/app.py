@@ -152,6 +152,8 @@ def get_ingestion_health(connection):
         "suricata_events": 0,
         "zeek_events": 0,
         "wazuh_events": 0,
+        "auth_lab_records": 0,
+        "auth_lab_detections": 0,
         "error_message": None,
         "data_mode": "SAMPLE LOGS"
     }
@@ -221,6 +223,21 @@ def get_ingestion_health(connection):
     health["wazuh_events"] = (
         latest_run["wazuh_events"] or 0
     )
+
+    # Support older ingestion databases that
+    # do not yet contain AuthLab columns.
+
+    run_columns = latest_run.keys()
+
+    if "auth_lab_records" in run_columns:
+        health["auth_lab_records"] = (
+            latest_run["auth_lab_records"] or 0
+        )
+
+    if "auth_lab_detections" in run_columns:
+        health["auth_lab_detections"] = (
+            latest_run["auth_lab_detections"] or 0
+        )
 
     health["error_message"] = (
         latest_run["error_message"]
