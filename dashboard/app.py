@@ -1,4 +1,3 @@
-
 import sqlite3
 import sys
 
@@ -13,7 +12,7 @@ from flask import (
     request,
     redirect,
     url_for,
-    send_file
+    send_file,
 )
 
 
@@ -30,11 +29,12 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from mitre_mapping import get_incident_mitre
 from report_generator import build_incident_pdf
+from threat_intel import enrich_event
 
 
 app = Flask(
     __name__,
-    template_folder=str(BASE_DIR / "templates")
+    template_folder=str(BASE_DIR / "templates"),
 )
 
 DB_PATH = PROJECT_ROOT / "data" / "homesoc.db"
@@ -48,14 +48,13 @@ ATTACK_STAGES = {
     "File Integrity Change": "System Modification",
     "Malware Alert": "Execution",
     "Suspicious DNS": "Command and Control",
-    "Command and Control": "Command and Control"
+    "Command and Control": "Command and Control",
 }
-
 
 VALID_STATUSES = {
     "NEW",
     "INVESTIGATING",
-    "RESOLVED"
+    "RESOLVED",
 }
 
 
@@ -64,10 +63,8 @@ VALID_STATUSES = {
 # ==================================================
 
 def get_db_connection():
-
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
-
     return connection
 
 
@@ -76,7 +73,6 @@ def get_db_connection():
 # ==================================================
 
 def parse_utc_timestamp(value):
-
     if not value:
         return None
 
@@ -97,7 +93,6 @@ def parse_utc_timestamp(value):
 
 
 def format_utc_timestamp(value):
-
     timestamp = parse_utc_timestamp(value)
 
     if timestamp is None:
@@ -109,7 +104,6 @@ def format_utc_timestamp(value):
 
 
 def format_elapsed_time(seconds):
-
     if seconds is None:
         return "Not available"
 
@@ -129,7 +123,6 @@ def format_elapsed_time(seconds):
         return f"{hours} hr ago"
 
     days = hours // 24
-
     return f"{days} day(s) ago"
 
 
@@ -138,7 +131,6 @@ def format_elapsed_time(seconds):
 # ==================================================
 
 def get_ingestion_health(connection):
-
     health = {
         "status": "NOT_STARTED",
         "status_label": "Never Run",
@@ -155,7 +147,7 @@ def get_ingestion_health(connection):
         "auth_lab_records": 0,
         "auth_lab_detections": 0,
         "error_message": None,
-        "data_mode": "SAMPLE LOGS"
+        "data_mode": "SAMPLE LOGS",
     }
 
     table_exists = connection.execute("""
@@ -183,7 +175,7 @@ def get_ingestion_health(connection):
     status_labels = {
         "SUCCESS": "Successful",
         "FAILED": "Failed",
-        "RUNNING": "Running"
+        "RUNNING": "Running",
     }
 
     latest_timestamp = (
@@ -192,12 +184,10 @@ def get_ingestion_health(connection):
     )
 
     health["status"] = run_status
-
     health["status_label"] = status_labels.get(
         run_status,
-        "Unknown"
+        "Unknown",
     )
-
     health["run_id"] = latest_run["id"]
 
     health["last_run_at"] = format_utc_timestamp(
@@ -207,26 +197,20 @@ def get_ingestion_health(connection):
     health["events_processed"] = (
         latest_run["normalized_events"] or 0
     )
-
     health["incidents_correlated"] = (
         latest_run["incidents_correlated"] or 0
     )
-
     health["suricata_events"] = (
         latest_run["suricata_events"] or 0
     )
-
     health["zeek_events"] = (
         latest_run["zeek_events"] or 0
     )
-
     health["wazuh_events"] = (
         latest_run["wazuh_events"] or 0
     )
 
-    # Support older ingestion databases that
-    # do not yet contain AuthLab columns.
-
+    # Support older databases without AuthLab columns.
     run_columns = latest_run.keys()
 
     if "auth_lab_records" in run_columns:
@@ -239,9 +223,7 @@ def get_ingestion_health(connection):
             latest_run["auth_lab_detections"] or 0
         )
 
-    health["error_message"] = (
-        latest_run["error_message"]
-    )
+    health["error_message"] = latest_run["error_message"]
 
     last_success = connection.execute("""
         SELECT completed_at
@@ -257,13 +239,11 @@ def get_ingestion_health(connection):
 
     completed_at = last_success["completed_at"]
 
-    health["last_success_at"] = (
-        format_utc_timestamp(completed_at)
-    )
-
-    parsed_time = parse_utc_timestamp(
+    health["last_success_at"] = format_utc_timestamp(
         completed_at
     )
+
+    parsed_time = parse_utc_timestamp(completed_at)
 
     if parsed_time is None:
         return health
@@ -272,19 +252,16 @@ def get_ingestion_health(connection):
         0,
         int(
             (
-                datetime.now(timezone.utc)
-                - parsed_time
+                datetime.now(timezone.utc) - parsed_time
             ).total_seconds()
-        )
+        ),
     )
 
-    health["last_success_age"] = (
-        format_elapsed_time(elapsed_seconds)
+    health["last_success_age"] = format_elapsed_time(
+        elapsed_seconds
     )
 
-    # Freshness measures ingestion activity,
-    # not the age of the sample log events.
-
+    # Measures ingestion activity, not sample event age.
     if elapsed_seconds <= 3600:
         health["freshness"] = "RECENT"
     else:
@@ -298,7 +275,6 @@ def get_ingestion_health(connection):
 # ==================================================
 
 def load_incident_and_events(incident_id):
-
     connection = get_db_connection()
 
     try:
@@ -308,7 +284,7 @@ def load_incident_and_events(incident_id):
             FROM incidents
             WHERE id = ?
             """,
-            (incident_id,)
+            (incident_id,),
         ).fetchone()
 
         if incident is None:
@@ -321,7 +297,7 @@ def load_incident_and_events(incident_id):
             WHERE incident_id = ?
             ORDER BY timestamp ASC
             """,
-            (incident_id,)
+            (incident_id,),
         ).fetchall()
 
         return incident, events
@@ -331,14 +307,12 @@ def load_incident_and_events(incident_id):
 
 
 def get_attack_progression(events):
-
     attack_progression = []
 
     for event in events:
-
         stage = ATTACK_STAGES.get(
             event["event_type"],
-            "Unknown"
+            "Unknown",
         )
 
         if stage not in attack_progression:
@@ -353,15 +327,14 @@ def get_attack_progression(events):
 
 @app.route("/")
 def dashboard():
-
     severity_filter = request.args.get(
         "severity",
-        ""
+        "",
     ).strip().upper()
 
     search_query = request.args.get(
         "search",
-        ""
+        "",
     ).strip()
 
     query = """
@@ -369,27 +342,20 @@ def dashboard():
         FROM incidents
         WHERE 1 = 1
     """
-
     params = []
 
     if severity_filter:
-
         query += """
             AND severity = ?
         """
-
         params.append(severity_filter)
 
     if search_query:
-
-        cleaned_search = (
-            search_query
-            .replace("#", "")
-            .strip()
-        )
+        cleaned_search = search_query.replace(
+            "#", ""
+        ).strip()
 
         if cleaned_search.isdigit():
-
             query += """
                 AND (
                     id = ?
@@ -401,11 +367,10 @@ def dashboard():
             params.extend([
                 int(cleaned_search),
                 f"%{search_query}%",
-                f"%{search_query}%"
+                f"%{search_query}%",
             ])
 
         else:
-
             query += """
                 AND (
                     asset_ip LIKE ?
@@ -415,7 +380,7 @@ def dashboard():
 
             params.extend([
                 f"%{search_query}%",
-                f"%{search_query}%"
+                f"%{search_query}%",
             ])
 
     query += """
@@ -425,10 +390,9 @@ def dashboard():
     connection = get_db_connection()
 
     try:
-
         incidents = connection.execute(
             query,
-            params
+            params,
         ).fetchall()
 
         # ------------------------------------------
@@ -462,39 +426,31 @@ def dashboard():
 
         total_raw_events = connection.execute("""
             SELECT COALESCE(
-                SUM(event_count),
-                0
+                SUM(event_count), 0
             ) AS total
             FROM incidents
         """).fetchone()["total"]
 
         total_unique_signals = connection.execute("""
             SELECT COALESCE(
-                SUM(signal_count),
-                0
+                SUM(signal_count), 0
             ) AS total
             FROM incidents
         """).fetchone()["total"]
 
-        total_duplicates_suppressed = (
-            connection.execute("""
-                SELECT COALESCE(
-                    SUM(suppressed_duplicates),
-                    0
-                ) AS total
-                FROM incidents
-            """).fetchone()["total"]
-        )
+        total_duplicates_suppressed = connection.execute("""
+            SELECT COALESCE(
+                SUM(suppressed_duplicates), 0
+            ) AS total
+            FROM incidents
+        """).fetchone()["total"]
 
-        total_corroboration_bonus = (
-            connection.execute("""
-                SELECT COALESCE(
-                    SUM(corroboration_bonus),
-                    0
-                ) AS total
-                FROM incidents
-            """).fetchone()["total"]
-        )
+        total_corroboration_bonus = connection.execute("""
+            SELECT COALESCE(
+                SUM(corroboration_bonus), 0
+            ) AS total
+            FROM incidents
+        """).fetchone()["total"]
 
         # ------------------------------------------
         # INGESTION SYSTEM HEALTH
@@ -510,36 +466,26 @@ def dashboard():
     if average_risk is None:
         average_risk = 0
 
-    average_risk = round(
-        average_risk,
-        1
-    )
+    average_risk = round(average_risk, 1)
 
     return render_template(
         "dashboard.html",
-
         incidents=incidents,
-
         total_incidents=total_incidents,
         critical_incidents=critical_incidents,
         protected_assets=protected_assets,
         average_risk=average_risk,
-
         total_raw_events=total_raw_events,
         total_unique_signals=total_unique_signals,
-
         total_duplicates_suppressed=(
             total_duplicates_suppressed
         ),
-
         total_corroboration_bonus=(
             total_corroboration_bonus
         ),
-
         ingestion_health=ingestion_health,
-
         severity_filter=severity_filter,
-        search_query=search_query
+        search_query=search_query,
     )
 
 
@@ -549,13 +495,20 @@ def dashboard():
 
 @app.route("/incident/<int:incident_id>")
 def incident_details(incident_id):
-
     incident, events = load_incident_and_events(
         incident_id
     )
 
     if incident is None:
         abort(404)
+
+    # Convert SQLite rows to dictionaries and add
+    # source, destination, and asset IP classifications.
+    # This also works for previously stored incidents.
+    events = [
+        enrich_event(dict(event))
+        for event in events
+    ]
 
     attack_progression = get_attack_progression(
         events
@@ -567,12 +520,10 @@ def incident_details(incident_id):
 
     return render_template(
         "incident.html",
-
         incident=incident,
         events=events,
-
         attack_progression=attack_progression,
-        mitre_techniques=mitre_techniques
+        mitre_techniques=mitre_techniques,
     )
 
 
@@ -582,13 +533,12 @@ def incident_details(incident_id):
 
 @app.route(
     "/incident/<int:incident_id>/status",
-    methods=["POST"]
+    methods=["POST"],
 )
 def update_incident_status(incident_id):
-
     new_status = request.form.get(
         "status",
-        ""
+        "",
     ).strip().upper()
 
     if new_status not in VALID_STATUSES:
@@ -597,17 +547,13 @@ def update_incident_status(incident_id):
     connection = get_db_connection()
 
     try:
-
         cursor = connection.execute(
             """
             UPDATE incidents
             SET status = ?
             WHERE id = ?
             """,
-            (
-                new_status,
-                incident_id
-            )
+            (new_status, incident_id),
         )
 
         if cursor.rowcount == 0:
@@ -622,7 +568,7 @@ def update_incident_status(incident_id):
     return redirect(
         url_for(
             "incident_details",
-            incident_id=incident_id
+            incident_id=incident_id,
         )
     )
 
@@ -633,7 +579,6 @@ def update_incident_status(incident_id):
 
 @app.route("/incident/<int:incident_id>/report")
 def download_incident_report(incident_id):
-
     incident, events = load_incident_and_events(
         incident_id
     )
@@ -650,12 +595,11 @@ def download_incident_report(incident_id):
     )
 
     # Generate the PDF entirely in memory.
-
     pdf_bytes = build_incident_pdf(
         incident=incident,
         events=events,
         mitre_techniques=mitre_techniques,
-        attack_progression=attack_progression
+        attack_progression=attack_progression,
     )
 
     filename = (
@@ -666,7 +610,7 @@ def download_incident_report(incident_id):
         BytesIO(pdf_bytes),
         mimetype="application/pdf",
         as_attachment=True,
-        download_name=filename
+        download_name=filename,
     )
 
 
@@ -675,7 +619,4 @@ def download_incident_report(incident_id):
 # ==================================================
 
 if __name__ == "__main__":
-
-    app.run(
-        debug=True
-    )
+    app.run(debug=True)

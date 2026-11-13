@@ -1,22 +1,7 @@
 
-"""
-HomeSOC Detection Engine v2
-
-Rule: HOMESOC-AUTH-001
-
-Detect repeated failed login attempts from the same
-source IP against the same protected asset.
-
-Features:
-- Five-minute sliding window
-- Source and asset isolation
-- Duplicate log suppression
-- Chronological event processing
-- Repeated burst handling
-"""
-
 from collections import defaultdict, deque
 from datetime import datetime, timezone
+from threat_intel import enrich_event
 
 
 RULE_ID = "HOMESOC-AUTH-001"
@@ -204,7 +189,7 @@ def detect_failed_login_bursts(
                 "attempt_count": attempt_count
             }
 
-            detections.append(detection)
+            detections.append(enrich_event(detection))
 
     detections.sort(
         key=lambda event: parse_event_time(

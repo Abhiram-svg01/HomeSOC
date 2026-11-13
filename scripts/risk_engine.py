@@ -1,4 +1,5 @@
 from event_parser import normalize_event
+from threat_intel import enrich_event
 
 
 EVENT_SCORES = {
@@ -52,7 +53,7 @@ def create_security_event(
     event["risk_score"] = score
     event["asset_ip"] = asset_ip or dst_ip
 
-    return event
+    return enrich_event(event)
 
 if __name__ == "__main__":
 
